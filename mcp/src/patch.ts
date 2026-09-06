@@ -160,9 +160,23 @@ export async function validatePatch(patch: unknown): Promise<{
       continue;
     }
 
-    if (typeof node.id !== 'string' || !node.id) push('error', where, 'missing id');
-    else if (seen.has(node.id)) push('error', where, `duplicate node id "${node.id}"`);
-    else seen.add(node.id);
+    if (typeof node.id !== 'string' || !node.id) {
+      push('error', where, 'missing id');
+    } else if (seen.has(node.id)) {
+      push('error', where, `duplicate node id "${node.id}"`);
+    } else {
+      seen.add(node.id);
+
+      // CanvasContext.setNodeIdCounterFromNodes throws "corrupted save" otherwise.
+      if (!/-\d+$/.test(node.id)) {
+        push(
+          'error',
+          where,
+          `node id "${node.id}" must end with "-<number>" (e.g. "${node.type ?? 'object'}-1") ` +
+            'or the app refuses to load the patch'
+        );
+      }
+    }
 
     if (typeof node.type !== 'string' || !node.type) {
       push('error', where, 'missing type');

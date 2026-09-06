@@ -62,19 +62,19 @@ console.log(`connected, baseline ${baseline} nodes`);
 await call('live_edit', {
   op: 'insertMany',
   nodes: [
-    { type: 'metro', data: { time: 400 } },
+    { type: 'object', data: { name: 'metro', expr: 'metro 400', params: [400] } },
     {
       type: 'js',
       data: { code: "recv(() => console.log('tick from insertMany'))", runOnMount: true }
     }
   ],
-  edges: [{ source: 0, target: 1, sourceHandle: 'message-out', targetHandle: 'in-0' }],
+  edges: [{ source: 0, target: 1, sourceHandle: 'message-out-0', targetHandle: 'in-0' }],
   position: { x: 200, y: 400 }
 });
 await wait(2000);
 
 let graph = (await call('live_snapshot')).graph;
-const metro = [...graph.nodes].reverse().find((n: { type: string }) => n.type === 'metro');
+const metro = [...graph.nodes].reverse().find((n: { type: string }) => n.type === 'object');
 const js = [...graph.nodes].reverse().find((n: { type: string }) => n.type === 'js');
 check('insertMany creates nodes', Boolean(metro && js), `nodes=${graph.nodes.length}`);
 check(
@@ -122,9 +122,9 @@ await call('live_edit', {
   op: 'connect',
   edges: [
     {
-      id: `xy-edge__${metro.id}message-out-${js.id}in-0`,
+      id: `xy-edge__${metro.id}message-out-0-${js.id}in-0`,
       source: metro.id,
-      sourceHandle: 'message-out',
+      sourceHandle: 'message-out-0',
       target: js.id,
       targetHandle: 'in-0'
     }
@@ -138,6 +138,19 @@ check(
     (e: { source: string; target: string }) => e.source === metro.id && e.target === js.id
   ),
   `edges=${graph.edges.length}`
+);
+
+check(
+  'canvas renders every node',
+  graph.rendered?.nodes === graph.nodes.length,
+  `graph ${graph.nodes.length} vs rendered ${graph.rendered?.nodes}`
+);
+
+// Known upstream gap: edges added programmatically stay in the graph and route
+// messages, but XYFlow does not draw them until the patch is reloaded.
+results.push(
+  `NOTE  edges drawn: ${graph.rendered?.edges}/${graph.edges.length}` +
+    (graph.rendered?.edges === graph.edges.length ? '' : ' (known upstream gap, cosmetic)')
 );
 
 // 6. replace — turn the metro into a slider

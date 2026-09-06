@@ -289,6 +289,64 @@ server.registerTool(
 // ── 3. Live editor bridge ──────────────────────────────────────────────────
 
 /**
+ * Guards the live ops against the node-kind mistake: naming an object-box type
+ * (metro, gain~, ...) as a node type places a node the canvas cannot render
+ * handles for, so edges to it silently never appear.
+ */
+async function assertPlaceableType(type: unknown): Promise<void> {
+  if (typeof type !== 'string' || !type) return;
+  if (type === 'object') return;
+
+  const object = await findObject(type);
+
+  if (!object) throw new Error(`Unknown object type "${type}" — check list_objects`);
+
+  if (object.nodeKind === 'object-box') {
+    const usage = usageExample(object);
+
+    throw new Error(
+      `"${type}" has no canvas node. Insert it as ${JSON.stringify(usage.example.data)} ` +
+        `with type "object". ${usage.note}`
+    );
+  }
+}
+
+/**
+ * insert, then report the node ID that was created.
+ *
+ * Inserting a code-bearing object (js, canvas, p5, hydra, ...) places it but does
+ * not execute the code, so this re-applies the same data through `edit`, which
+ * does trigger a run. Without it the object sits there silently.
+ */
+async function insertOne(params: Record<string, unknown>): Promise<unknown> {
+  type Snapshot = { nodes: { id: string; type: string }[] };
+
+  const before = (await callBridge('snapshot')) as Snapshot;
+  await callBridge('insert', params);
+
+  const after = (await callBridge('snapshot')) as Snapshot;
+  const created = after.nodes.slice(before.nodes.length);
+  const node = created[created.length - 1];
+
+  if (!node) return { inserted: params.type, warning: 'could not identify the new node' };
+
+  const data = params.data as Record<string, unknown> | undefined;
+  const hasCode = typeof data?.code === 'string' && data.code.trim().length > 0;
+
+  // editNode only sets the execution trigger when data.code differs from what the
+  // node already has, so re-sending identical code is a no-op. Appending a newline
+  // keeps the program identical while making the value change.
+  if (hasCode) {
+    await callBridge('edit', {
+      nodeId: node.id,
+      data: { ...data, code: `${data!.code as string}\n` }
+    });
+  }
+
+  return { inserted: node.type, nodeId: node.id, codeExecuted: hasCode };
+}
+
+/**
  * insertMany + edges in two phases.
  *
  * The editor's multi-object insert validates edge handles against
@@ -376,7 +434,8 @@ server.registerTool(
     description:
       'Applies a canvas operation to the connected editor using the same code path as the built-in ' +
       'AI chat: insert, insertMany, edit, replace, connect, disconnect, delete, move. ' +
-      'Note the two edge shapes: insertMany uses node INDEXES, connect uses node IDs.',
+      'Note the two edge shapes: insertMany uses node INDEXES, connect uses node IDs. ' +
+      'insert returns the new nodeId and re-applies code so it actually runs.',
     inputSchema: {
       op: z.enum([
         'insert',
@@ -421,10 +480,20 @@ server.registerTool(
     try {
       const args = params as Record<string, unknown>;
 
+      if (op === 'insert' || op === 'replace') await assertPlaceableType(args.type);
+
+      if (op === 'insertMany') {
+        for (const node of (args.nodes as Record<string, unknown>[]) ?? []) {
+          await assertPlaceableType(node.type);
+        }
+      }
+
       const result =
         op === 'insertMany' && Array.isArray(args.edges) && args.edges.length > 0
           ? await insertManyWithEdges(args)
-          : await callBridge(op as BridgeOp, args);
+          : op === 'insert'
+            ? await insertOne(args)
+            : await callBridge(op as BridgeOp, args);
 
       return json({ op, result });
     } catch (error) {

@@ -200,3 +200,25 @@ test('the bundled example patch stays valid', async () => {
 
   expect(report.ok).toBe(true);
 });
+
+test('validate_patch rejects node ids the app cannot parse', async () => {
+  const report = await withClient(async (client) => {
+    const result = await client.callTool({
+      name: 'validate_patch',
+      arguments: {
+        patch: {
+          name: 'named ids',
+          nodes: [{ id: 'seq', type: 'js', position: { x: 0, y: 0 }, data: {} }],
+          edges: []
+        }
+      }
+    });
+
+    return JSON.parse(textOf(result));
+  });
+
+  expect(report.ok).toBe(false);
+  expect(report.issues.map((i: { message: string }) => i.message).join(' ')).toContain(
+    'must end with "-<number>"'
+  );
+});

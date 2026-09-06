@@ -89,8 +89,26 @@ async function runOp(
   const cb = host.callbacks;
 
   switch (op) {
-    case 'snapshot':
-      return host.getGraphSummary();
+    case 'snapshot': {
+      const graph = host.getGraphSummary() as Record<string, unknown>;
+
+      // What the canvas actually renders, plus the handle IDs that really exist —
+      // an agent can then tell a stale view from a wrong handle instead of
+      // trusting the graph alone. Note that programmatically added edges are known
+      // not to draw (see mcp/README.md), so rendered.edges lagging is expected.
+      return {
+        ...graph,
+        rendered: {
+          nodes: document.querySelectorAll('.svelte-flow__node').length,
+          // Custom edges render through BaseEdge, which only emits the path element.
+          edges: document.querySelectorAll('.svelte-flow__edge-path').length,
+          handles: [...document.querySelectorAll('.svelte-flow__handle')].map((el) => ({
+            node: el.closest('.svelte-flow__node')?.getAttribute('data-id'),
+            id: el.getAttribute('data-handleid')
+          }))
+        }
+      };
+    }
 
     case 'viewport':
       return host.getViewportSummary();

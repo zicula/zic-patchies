@@ -42,6 +42,9 @@ example. `validate_patch` rejects the wrong form with the correct one in the mes
 Object-box handles always follow `{audio|message|analysis}-{in|out}-N`
 (e.g. `message-out-0`), never the bare `message-out` a node-kind object uses.
 
+Node IDs must end in `-<number>` (`metro-1`, `object-14`). The app parses the counter
+back out of them and refuses the whole patch with "corrupted save" otherwise.
+
 ## Tools
 
 ### Catalog and docs
@@ -57,7 +60,7 @@ Object-box handles always follow `{audio|message|analysis}-{in|out}-N`
 
 | Tool | What it does |
 | --- | --- |
-| `validate_patch` | Checks a patch file or inline JSON: unknown object types, node-kind mistakes, malformed object boxes, dangling edges, wrong handle IDs, duplicate node IDs, patch version |
+| `validate_patch` | Checks a patch file or inline JSON: unknown object types, node-kind mistakes, malformed object boxes, dangling edges, wrong handle IDs, duplicate node IDs, node IDs the app cannot parse, patch version |
 | `write_patch` | Normalizes (version, timestamps, XYFlow edge IDs), validates, and writes only if clean |
 
 Patch files use the same format as `ui/static/help-patches/*.json`, so anything written
@@ -82,15 +85,28 @@ localStorage.setItem('patchies:mcpBridgePort', '47820'); // optional
 
 Port `47820` by default; override the server side with `PATCHIES_MCP_BRIDGE_PORT`.
 
-Two behaviours worth knowing:
+Behaviours worth knowing:
 
 - **`insertMany` runs in two phases.** The editor validates multi-insert edges against
   handle specs that cover only 67 object types, silently dropping cables that touch the
   other 177. So the server inserts the nodes, reads back their real IDs, and connects
   them separately. Edges you pass use **0-based indexes** into `nodes`; `connect` uses
   real node IDs.
+- **`insert` returns the new `nodeId` and actually runs the code.** The editor only
+  triggers execution when `data.code` changes, so the server re-applies the code after
+  inserting. Without that a `js`/`p5`/`canvas` object sits there silently.
 - **`replace` creates a new node ID.** Re-read the graph after replacing instead of
   reusing the old ID.
+- **`live_snapshot` also reports what the canvas rendered** (`rendered.nodes`,
+  `rendered.edges`, `rendered.handles`) so you can tell a wrong handle ID from a stale
+  view, and warns when more than one editor tab is connected.
+
+### Known upstream gap
+
+Edges added programmatically live in the graph and route messages, but XYFlow does not
+draw the cable until the patch is reloaded — `rendered.edges` stays behind
+`graph.edges`. Judge connections by the graph and by `live_console`, never by looking at
+the canvas. Reloading the patch (or loading it from a file) draws them correctly.
 
 ### Repo automation
 
@@ -112,7 +128,7 @@ Two behaviours worth knowing:
 ## Tests
 
 ```bash
-cd mcp && bun test        # 9 tests, no browser needed
+cd mcp && bun test        # 10 tests, no browser needed
 bun scripts/live-check.ts # end-to-end against a running editor
 ```
 

@@ -41,6 +41,7 @@ let server: ReturnType<typeof Bun.serve> | null = null;
 let startError: string | null = null;
 let socket: ServerWebSocket<unknown> | null = null;
 let clientInfo: { connectedAt: number; url?: string } | null = null;
+const sockets = new Set<ServerWebSocket<unknown>>();
 let nextId = 1;
 
 const pending = new Map<number, Pending>();
@@ -100,6 +101,7 @@ export function startBridge(): { port: number; error: string | null } {
       },
       websocket: {
         open(ws) {
+          sockets.add(ws);
           socket = ws;
           clientInfo = { connectedAt: Date.now() };
         },
@@ -107,9 +109,11 @@ export function startBridge(): { port: number; error: string | null } {
           handleMessage(typeof message === 'string' ? message : new TextDecoder().decode(message));
         },
         close(ws) {
+          sockets.delete(ws);
+
           if (socket === ws) {
-            socket = null;
-            clientInfo = null;
+            socket = [...sockets].pop() ?? null;
+            clientInfo = socket ? { connectedAt: Date.now() } : null;
           }
         }
       }
@@ -131,6 +135,7 @@ export function stopBridge(): void {
   server?.stop(true);
   server = null;
   socket = null;
+  sockets.clear();
   clientInfo = null;
 }
 
@@ -141,6 +146,8 @@ export function bridgeStatus(): {
   client: { connectedAt: number; url?: string } | null;
   consoleEntries: number;
   error: string | null;
+  clients: number;
+  warning?: string;
 } {
   return {
     listening: server !== null,
@@ -148,7 +155,14 @@ export function bridgeStatus(): {
     connected: socket !== null,
     client: clientInfo,
     consoleEntries: consoleLog.length,
-    error: startError
+    error: startError,
+    clients: sockets.size,
+    // Several open editors answer as one; results would jump between patches.
+    ...(sockets.size > 1
+      ? {
+          warning: `${sockets.size} editors are connected — close all but one tab, or ops and snapshots will target whichever answered last`
+        }
+      : {})
   };
 }
 
