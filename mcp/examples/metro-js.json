@@ -1,0 +1,38 @@
+{
+  "name": "mcp smoke patch",
+  "version": "15",
+  "timestamp": 1788687235711,
+  "nodes": [
+    {
+      "data": {
+        "time": 500
+      },
+      "id": "metro-1",
+      "type": "metro",
+      "position": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "data": {
+        "code": "recv(() => console.log('tick'))"
+      },
+      "id": "js-1",
+      "type": "js",
+      "position": {
+        "x": 0,
+        "y": 160
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "metro-1",
+      "sourceHandle": "message-out",
+      "target": "js-1",
+      "targetHandle": "in-0",
+      "id": "xy-edge__metro-1message-out-js-1in-0"
+    }
+  ]
+}

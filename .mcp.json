@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "patchies": {
+      "command": "bun",
+      "args": ["mcp/src/index.ts"],
+      "env": {}
+    }
+  }
+}

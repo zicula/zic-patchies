@@ -156,6 +156,7 @@
   import type { AiPromptMode, AiModeContext } from '$lib/ai/modes/types';
   import type { ChatViewportSummary } from '$lib/ai/chat/resolver';
   import { buildChatViewportSummary } from '$lib/ai/chat/viewport-summary';
+  import { connectMcpBridge } from '$lib/mcp-bridge';
 
   const AUTOSAVE_INTERVAL = 2500;
   // Initial nodes and edges
@@ -829,8 +830,17 @@
     onMoveObjects: handleAiMoveObjects
   };
 
+  let disposeMcpBridge: (() => void) | null = null;
+
   onMount(() => {
     flowContainer?.focus();
+
+    // Lets the MCP server drive this canvas with the same callbacks the AI chat uses.
+    disposeMcpBridge = connectMcpBridge({
+      callbacks: aiCallbacks,
+      getGraphSummary,
+      getViewportSummary
+    });
 
     // Initialize VFS with providers
     initializeVFS();
@@ -991,6 +1001,9 @@
       clearInterval(autosaveInterval);
       autosaveInterval = null;
     }
+
+    disposeMcpBridge?.();
+    disposeMcpBridge = null;
 
     // Clean up viewport culling manager
     viewportCullingManager.destroy();

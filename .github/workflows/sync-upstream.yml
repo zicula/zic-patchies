@@ -1,0 +1,59 @@
+name: Sync with upstream
+
+# Keeps this fork current with heypoom/patchies.
+# Runs daily and can be triggered manually. Local commits are preserved: the job
+# merges upstream into main and opens an issue if the merge conflicts.
+
+on:
+  schedule:
+    - cron: '17 3 * * *' # 10:17 Asia/Bangkok
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Merge upstream
+        id: merge
+        run: |
+          git remote add upstream https://github.com/heypoom/patchies.git
+          git fetch upstream main
+
+          BEHIND=$(git rev-list --count HEAD..upstream/main)
+          echo "behind=$BEHIND" >> "$GITHUB_OUTPUT"
+
+          if [ "$BEHIND" = "0" ]; then
+            echo "already up to date"
+            exit 0
+          fi
+
+          if git merge --no-edit upstream/main; then
+            git push origin HEAD:main
+            echo "merged=true" >> "$GITHUB_OUTPUT"
+          else
+            git merge --abort
+            echo "conflict=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Report conflict
+        if: steps.merge.outputs.conflict == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "Upstream sync needs a manual merge" \
+            --body "The scheduled sync could not merge \`upstream/main\` cleanly (${{ steps.merge.outputs.behind }} commits behind). Resolve locally with the MCP \`sync_upstream\` tool or \`git merge upstream/main\`."

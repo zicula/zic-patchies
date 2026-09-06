@@ -1,0 +1,19 @@
+{
+  "name": "patchies-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP server that lets coding agents author, validate, run and extend Patchies patches",
+  "scripts": {
+    "start": "bun src/index.ts",
+    "dump-catalog": "bun scripts/dump-catalog.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.22.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.0"
+  }
+}
