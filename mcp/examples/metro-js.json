@@ -5,10 +5,14 @@
   "nodes": [
     {
       "data": {
-        "time": 500
+        "name": "metro",
+        "expr": "metro 500",
+        "params": [
+          500
+        ]
       },
       "id": "metro-1",
-      "type": "metro",
+      "type": "object",
       "position": {
         "x": 0,
         "y": 0
@@ -29,10 +33,10 @@
   "edges": [
     {
       "source": "metro-1",
-      "sourceHandle": "message-out",
+      "sourceHandle": "message-out-0",
       "target": "js-1",
       "targetHandle": "in-0",
-      "id": "xy-edge__metro-1message-out-js-1in-0"
+      "id": "xy-edge__metro-1message-out-0-js-1in-0"
     }
   ]
 }

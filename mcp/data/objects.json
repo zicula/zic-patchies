@@ -1,9 +1,10 @@
 {
-  "generatedAt": "2026-09-06T09:28:12.188Z",
+  "generatedAt": "2026-09-06T13:34:54.950Z",
   "counts": {
     "withSchema": 239,
     "docsOnly": 5,
-    "handleSpecs": 67
+    "handleSpecs": 67,
+    "nodeTypes": 127
   },
   "objects": [
     {
@@ -44,7 +45,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "-~",
@@ -84,7 +86,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "!",
@@ -117,7 +120,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "!=",
@@ -158,7 +162,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "*",
@@ -198,7 +203,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "*~",
@@ -239,7 +245,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "/",
@@ -279,7 +286,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "/~",
@@ -319,7 +327,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "&&",
@@ -360,7 +369,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "+",
@@ -400,7 +410,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "+~",
@@ -441,7 +452,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "<",
@@ -482,7 +494,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "<=",
@@ -523,7 +536,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "<~",
@@ -565,7 +579,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "==",
@@ -606,7 +621,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": ">",
@@ -647,7 +663,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": ">=",
@@ -688,7 +705,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": ">~",
@@ -730,7 +748,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "||",
@@ -771,7 +790,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "abs~",
@@ -804,7 +824,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "adsr",
@@ -873,7 +894,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "adsr~",
@@ -938,7 +960,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "ai.img",
@@ -985,7 +1008,8 @@
           "handle": "message-out-1"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "ai.music",
@@ -1015,7 +1039,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "ai.stt",
@@ -1055,7 +1080,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "ai.tts",
@@ -1088,7 +1114,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "ai.txt",
@@ -1125,7 +1152,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "allpass~",
@@ -1172,7 +1200,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "and",
@@ -1213,7 +1242,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "anupars",
@@ -1243,7 +1273,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "asm",
@@ -1273,7 +1304,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "asm.mem",
@@ -1301,7 +1333,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "bandpass~",
@@ -1348,7 +1381,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "bang~",
@@ -1379,7 +1413,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "beat",
@@ -1401,7 +1436,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "beat~",
@@ -1435,7 +1471,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "bg.out",
@@ -1457,7 +1494,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "biquad~",
@@ -1531,7 +1569,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "button",
@@ -1561,7 +1600,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "bytebeat~",
@@ -1592,7 +1632,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "canvas",
@@ -1614,7 +1655,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "canvas.dom",
@@ -1638,7 +1680,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "chuck~",
@@ -1684,7 +1727,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "clip",
@@ -1733,7 +1777,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "clip~",
@@ -1783,7 +1828,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "comb~",
@@ -1833,7 +1879,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "compressor~",
@@ -1904,7 +1951,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "convolver~",
@@ -1944,7 +1992,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "cos~",
@@ -1978,7 +2027,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "csound~",
@@ -2018,7 +2068,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "curve",
@@ -2046,7 +2097,8 @@
           "handle": null
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "debounce",
@@ -2083,7 +2135,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "delay",
@@ -2120,7 +2173,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "delay~",
@@ -2159,7 +2213,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "delread~",
@@ -2198,7 +2253,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "delread4~",
@@ -2240,7 +2296,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "delwrite~",
@@ -2284,7 +2341,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "dom",
@@ -2311,7 +2369,8 @@
           "handle": null
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "drums~",
@@ -2341,7 +2400,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "dsp~",
@@ -2374,7 +2434,8 @@
           "handle": null
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "elem~",
@@ -2415,7 +2476,8 @@
           "handle": null
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "env~",
@@ -2456,7 +2518,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "epiano~",
@@ -2486,7 +2549,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "eq",
@@ -2527,7 +2591,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "exp~",
@@ -2560,7 +2625,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "expr",
@@ -2589,7 +2655,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "expr~",
@@ -2628,7 +2695,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "f",
@@ -2665,7 +2733,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "fexpr~",
@@ -2702,7 +2771,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "fft~",
@@ -2741,7 +2811,8 @@
           "handle": "analysis-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "filter",
@@ -2776,7 +2847,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "float",
@@ -2813,7 +2885,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "float.tex",
@@ -2847,7 +2920,8 @@
           "handle": "video-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "ftom~",
@@ -2881,7 +2955,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "gain~",
@@ -2921,7 +2996,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "glsl",
@@ -2946,7 +3022,8 @@
           "handle": "video-out-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "gm~",
@@ -2977,7 +3054,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "group",
@@ -2991,7 +3069,8 @@
       ],
       "inlets": [],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "gt",
@@ -3032,7 +3111,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "gte",
@@ -3073,7 +3153,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "highpass~",
@@ -3120,7 +3201,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "highshelf~",
@@ -3167,7 +3249,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "hydra",
@@ -3189,7 +3272,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "i",
@@ -3226,7 +3310,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "iframe",
@@ -3254,7 +3339,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "img",
@@ -3275,7 +3361,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "int",
@@ -3312,7 +3399,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "js",
@@ -3338,7 +3426,8 @@
           "handle": null
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "keyboard",
@@ -3367,7 +3456,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "knob",
@@ -3398,7 +3488,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "kv",
@@ -3433,7 +3524,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "label",
@@ -3447,7 +3539,8 @@
       ],
       "inlets": [],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "latch~",
@@ -3488,7 +3581,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "line~",
@@ -3529,7 +3623,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "link",
@@ -3544,7 +3639,8 @@
       ],
       "inlets": [],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "loadbang",
@@ -3566,7 +3662,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "log~",
@@ -3599,7 +3696,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "lowpass~",
@@ -3646,7 +3744,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "lowshelf~",
@@ -3693,7 +3792,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "lt",
@@ -3734,7 +3834,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "lte",
@@ -3775,7 +3876,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "mallet~",
@@ -3805,7 +3907,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "map",
@@ -3834,7 +3937,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "markdown",
@@ -3862,7 +3966,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "max~",
@@ -3902,7 +4007,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "mellotron~",
@@ -3932,7 +4038,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "merge~",
@@ -3971,7 +4078,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "meter~",
@@ -4001,7 +4109,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "metro",
@@ -4042,7 +4151,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "mic~",
@@ -4073,7 +4183,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "midi.file",
@@ -4101,7 +4212,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "midi.in",
@@ -4130,7 +4242,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "midi.out",
@@ -4152,7 +4265,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "min~",
@@ -4192,7 +4306,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "mqtt",
@@ -4221,7 +4336,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "msg",
@@ -4250,7 +4366,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "mtof",
@@ -4282,7 +4399,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "mtof~",
@@ -4316,7 +4434,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "neq",
@@ -4357,7 +4476,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "netrecv",
@@ -4386,7 +4506,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "netsend",
@@ -4408,7 +4529,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "ngea",
@@ -4441,7 +4563,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "noise~",
@@ -4464,7 +4587,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "not",
@@ -4497,7 +4621,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "notch~",
@@ -4545,7 +4670,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "note",
@@ -4559,7 +4685,8 @@
       ],
       "inlets": [],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "or",
@@ -4600,7 +4727,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "orca",
@@ -4629,7 +4757,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "osc~",
@@ -4675,7 +4804,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "out~",
@@ -4697,7 +4827,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "p5",
@@ -4714,7 +4845,8 @@
       ],
       "inlets": [],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "pack",
@@ -4753,7 +4885,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "pads~",
@@ -4784,7 +4917,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "pan~",
@@ -4823,7 +4957,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "patchbay",
@@ -4846,7 +4981,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "peaking~",
@@ -4901,7 +5037,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "peek",
@@ -4923,7 +5060,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "peppermint",
@@ -4952,7 +5090,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "phasor~",
@@ -4993,7 +5132,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "piano~",
@@ -5023,7 +5163,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "pink~",
@@ -5047,7 +5188,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "pixi",
@@ -5067,7 +5209,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "pixi.dom",
@@ -5081,7 +5224,8 @@
       ],
       "inlets": [],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "pow~",
@@ -5122,7 +5266,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "projmap",
@@ -5146,7 +5291,8 @@
           "handle": "video-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "pulse~",
@@ -5197,7 +5343,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "python",
@@ -5226,7 +5373,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "queue",
@@ -5263,7 +5411,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "r",
@@ -5295,7 +5444,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "r~",
@@ -5327,7 +5477,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "recv",
@@ -5359,7 +5510,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "recv.vdo",
@@ -5390,7 +5542,8 @@
           "handle": "video-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "recv~",
@@ -5422,7 +5575,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "regl",
@@ -5445,7 +5599,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "rsqrt~",
@@ -5479,7 +5634,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "ruby",
@@ -5507,7 +5663,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "s",
@@ -5538,7 +5695,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "s~",
@@ -5569,7 +5727,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "samphold~",
@@ -5618,7 +5777,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "sampler~",
@@ -5655,7 +5815,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "samplerate~",
@@ -5685,7 +5846,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "scale",
@@ -5749,7 +5911,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "scan",
@@ -5784,7 +5947,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "scope~",
@@ -5814,7 +5978,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "screen",
@@ -5846,7 +6011,8 @@
           "handle": "video-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "sel",
@@ -5891,7 +6057,8 @@
           "handle": "message-out-1"
         }
       ],
-      "hasDoc": false
+      "hasDoc": false,
+      "nodeKind": "object-box"
     },
     {
       "name": "select",
@@ -5936,7 +6103,8 @@
           "handle": "message-out-1"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "send",
@@ -5967,7 +6135,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "send.vdo",
@@ -5997,7 +6166,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "send~",
@@ -6028,7 +6198,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "sequencer",
@@ -6062,7 +6233,8 @@
           "handle": "out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "serial",
@@ -6093,7 +6265,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "serial.dmx",
@@ -6118,7 +6291,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "serial.term",
@@ -6150,7 +6324,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "shaderpark",
@@ -6167,7 +6342,8 @@
       ],
       "inlets": [],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "sheet",
@@ -6196,7 +6372,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "sig~",
@@ -6227,7 +6404,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "slider",
@@ -6258,7 +6436,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "slop~",
@@ -6301,7 +6480,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "smolken~",
@@ -6331,7 +6511,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "snapshot~",
@@ -6372,7 +6553,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "sonic~",
@@ -6413,7 +6595,8 @@
           "handle": null
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "soundfile~",
@@ -6444,7 +6627,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "soundfont~",
@@ -6474,7 +6658,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "soundfont2~",
@@ -6504,7 +6689,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "spigot",
@@ -6544,7 +6730,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "split~",
@@ -6583,7 +6770,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "sqrt~",
@@ -6616,7 +6804,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "sse",
@@ -6645,7 +6834,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "stack",
@@ -6682,7 +6872,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "strudel",
@@ -6712,7 +6903,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "stt",
@@ -6743,7 +6935,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "surface",
@@ -6774,7 +6967,8 @@
           "handle": "video-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "swgl",
@@ -6814,7 +7008,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "switch",
@@ -6837,7 +7032,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "table",
@@ -6866,7 +7062,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "tabosc4~",
@@ -6907,7 +7104,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "tabread~",
@@ -6948,7 +7146,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "tabread4~",
@@ -6990,7 +7189,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "tabwrite~",
@@ -7022,7 +7222,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "tap",
@@ -7051,7 +7252,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "tap~",
@@ -7103,7 +7305,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "textbox",
@@ -7133,7 +7336,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "textmode",
@@ -7148,7 +7352,8 @@
       ],
       "inlets": [],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "textmode.dom",
@@ -7164,7 +7369,8 @@
       ],
       "inlets": [],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "three",
@@ -7186,7 +7392,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "three.dom",
@@ -7208,7 +7415,8 @@
         }
       ],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "threshold~",
@@ -7258,7 +7466,8 @@
           "handle": "message-out-1"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "throttle",
@@ -7295,7 +7504,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "title",
@@ -7311,7 +7521,8 @@
       ],
       "inlets": [],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "toggle",
@@ -7342,7 +7553,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "tone~",
@@ -7383,7 +7595,8 @@
           "handle": null
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "trigger",
@@ -7411,7 +7624,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "tts",
@@ -7442,7 +7656,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "uiua",
@@ -7477,7 +7692,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "uniq",
@@ -7512,7 +7728,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "uniqby",
@@ -7549,7 +7766,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "unpack",
@@ -7586,7 +7804,8 @@
           "handle": "message-out-1"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "uxn",
@@ -7615,7 +7834,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "vcf~",
@@ -7675,7 +7895,8 @@
           "handle": "audio-out-1"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "vdo.ninja.pull",
@@ -7715,7 +7936,8 @@
           "handle": "message-out-1"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "vdo.ninja.push",
@@ -7755,7 +7977,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "versilian~",
@@ -7785,7 +8008,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "video",
@@ -7815,7 +8039,8 @@
           "handle": "audio-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "vision.body",
@@ -7854,7 +8079,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "vision.classify",
@@ -7893,7 +8119,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "vision.detect",
@@ -7932,7 +8159,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "vision.face",
@@ -7971,7 +8199,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "vision.gesture",
@@ -8011,7 +8240,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "vision.hand",
@@ -8050,7 +8280,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "vision.segment",
@@ -8096,7 +8327,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "vline~",
@@ -8130,7 +8362,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "vue",
@@ -8157,7 +8390,8 @@
           "handle": null
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "waveshaper~",
@@ -8203,7 +8437,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "webcam",
@@ -8233,7 +8468,8 @@
           "handle": "video-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "webmidilink",
@@ -8262,7 +8498,8 @@
           "handle": "message-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "wgpu.compute",
@@ -8291,7 +8528,8 @@
           "handle": "message-out"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "worker",
@@ -8318,7 +8556,8 @@
           "handle": null
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "node"
     },
     {
       "name": "wrap~",
@@ -8351,7 +8590,8 @@
           "handle": "audio-out-0"
         }
       ],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "add",
@@ -8360,7 +8600,8 @@
       "tags": [],
       "inlets": [],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "div",
@@ -8369,7 +8610,8 @@
       "tags": [],
       "inlets": [],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "div~",
@@ -8378,7 +8620,8 @@
       "tags": [],
       "inlets": [],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "mul",
@@ -8387,7 +8630,8 @@
       "tags": [],
       "inlets": [],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     },
     {
       "name": "sub",
@@ -8396,7 +8640,8 @@
       "tags": [],
       "inlets": [],
       "outlets": [],
-      "hasDoc": true
+      "hasDoc": true,
+      "nodeKind": "object-box"
     }
   ],
   "handleSpecs": {

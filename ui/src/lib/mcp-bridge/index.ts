@@ -81,7 +81,11 @@ function stringifyArg(arg: unknown): string {
   }
 }
 
-function runOp(host: McpBridgeHost, op: string, params: Record<string, unknown>): unknown {
+async function runOp(
+  host: McpBridgeHost,
+  op: string,
+  params: Record<string, unknown>
+): Promise<unknown> {
   const cb = host.callbacks;
 
   switch (op) {
@@ -100,7 +104,8 @@ function runOp(host: McpBridgeHost, op: string, params: Record<string, unknown>)
       return { inserted: params.type };
 
     case 'insertMany':
-      cb.onInsertMultipleObjects(
+      // Awaited so the MCP side can snapshot the canvas once nodes really exist.
+      await cb.onInsertMultipleObjects(
         (params.nodes as AiObjectNode[]) ?? [],
         (params.edges as SimplifiedEdge[]) ?? [],
         params.position as { x: number; y: number } | undefined
@@ -185,7 +190,7 @@ export function connectMcpBridge(host: McpBridgeHost): () => void {
       socket?.send(JSON.stringify({ type: 'hello', url: window.location.href }));
     });
 
-    socket.addEventListener('message', (event) => {
+    socket.addEventListener('message', async (event) => {
       let request: { id: number; op: string; params?: Record<string, unknown> };
 
       try {
@@ -195,7 +200,7 @@ export function connectMcpBridge(host: McpBridgeHost): () => void {
       }
 
       try {
-        const result = runOp(host, request.op, request.params ?? {});
+        const result = await runOp(host, request.op, request.params ?? {});
         socket?.send(JSON.stringify({ id: request.id, ok: true, result }));
       } catch (error) {
         socket?.send(

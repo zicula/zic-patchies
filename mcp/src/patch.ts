@@ -105,7 +105,11 @@ function validateHandle(
   return matchHandleToSpec(handle, direction === 'in' ? spec.inlets : spec.outlets, direction);
 }
 
-export type ValidationIssue = { level: 'error' | 'warning'; where: string; message: string };
+export type ValidationIssue = {
+  level: 'error' | 'warning';
+  where: string;
+  message: string;
+};
 
 export async function validatePatch(patch: unknown): Promise<{
   ok: boolean;
@@ -117,7 +121,11 @@ export async function validatePatch(patch: unknown): Promise<{
     issues.push({ level, where, message });
 
   if (!patch || typeof patch !== 'object' || Array.isArray(patch)) {
-    return { ok: false, issues: [{ level: 'error', where: 'patch', message: 'not an object' }], summary: { nodes: 0, edges: 0 } };
+    return {
+      ok: false,
+      issues: [{ level: 'error', where: 'patch', message: 'not an object' }],
+      summary: { nodes: 0, edges: 0 }
+    };
   }
 
   const p = patch as Partial<Patch>;
@@ -138,6 +146,9 @@ export async function validatePatch(patch: unknown): Promise<{
 
   const catalog = await loadCatalog();
   const known = new Set(catalog.objects.map((o) => o.name));
+  const objectBoxOnly = new Set(
+    catalog.objects.filter((o) => o.nodeKind === 'object-box').map((o) => o.name)
+  );
   const nodeTypes = new Map<string, string>();
   const seen = new Set<string>();
 
@@ -158,8 +169,31 @@ export async function validatePatch(patch: unknown): Promise<{
     } else {
       nodeTypes.set(node.id, node.type);
 
-      if (node.type !== 'object' && !known.has(node.type)) {
+      if (node.type === 'object') {
+        const boxName = (node.data as Record<string, unknown> | undefined)?.name;
+
+        if (typeof boxName !== 'string' || !boxName) {
+          push('error', where, 'object boxes need data.name (and a matching data.expr)');
+        } else if (!known.has(boxName)) {
+          push('error', where, `unknown object "${boxName}" in data.name`);
+        }
+
+        const expr = (node.data as Record<string, unknown> | undefined)?.expr;
+
+        if (typeof expr !== 'string' || !expr.trim()) {
+          push('error', where, 'object boxes need data.expr, e.g. "osc~ 440"');
+        } else if (typeof boxName === 'string' && boxName && !expr.startsWith(boxName)) {
+          push('warning', where, `data.expr "${expr}" does not start with data.name "${boxName}"`);
+        }
+      } else if (!known.has(node.type)) {
         push('error', where, `unknown object type "${node.type}"`);
+      } else if (objectBoxOnly.has(node.type)) {
+        push(
+          'error',
+          where,
+          `"${node.type}" has no node component — use type "object" with ` +
+            `data: { name: "${node.type}", expr: "${node.type} ...", params: [] }`
+        );
       }
     }
 
@@ -169,7 +203,10 @@ export async function validatePatch(patch: unknown): Promise<{
       push('error', where, 'position must be { x: number, y: number }');
     }
 
-    if (node.data !== undefined && (typeof node.data !== 'object' || node.data === null || Array.isArray(node.data))) {
+    if (
+      node.data !== undefined &&
+      (typeof node.data !== 'object' || node.data === null || Array.isArray(node.data))
+    ) {
       push('error', where, 'data must be an object');
     }
   }
@@ -182,8 +219,10 @@ export async function validatePatch(patch: unknown): Promise<{
       continue;
     }
 
-    if (!nodeTypes.has(edge.source)) push('error', where, `source "${edge.source}" is not a node in this patch`);
-    if (!nodeTypes.has(edge.target)) push('error', where, `target "${edge.target}" is not a node in this patch`);
+    if (!nodeTypes.has(edge.source))
+      push('error', where, `source "${edge.source}" is not a node in this patch`);
+    if (!nodeTypes.has(edge.target))
+      push('error', where, `target "${edge.target}" is not a node in this patch`);
 
     const sourceType = nodeTypes.get(edge.source);
     const targetType = nodeTypes.get(edge.target);
@@ -223,7 +262,10 @@ export function normalizePatch(input: Partial<Patch> & { name: string }): Patch 
     version: input.version ?? CURRENT_PATCH_VERSION,
     timestamp: input.timestamp ?? Date.now(),
     nodes: (input.nodes ?? []).map((node) => ({ data: {}, ...node })),
-    edges: (input.edges ?? []).map((edge) => ({ ...edge, id: edge.id ?? edgeId(edge) })),
+    edges: (input.edges ?? []).map((edge) => ({
+      ...edge,
+      id: edge.id ?? edgeId(edge)
+    })),
     ...(input.patchId ? { patchId: input.patchId } : {}),
     ...(input.settings ? { settings: input.settings } : {}),
     ...(input.files ? { files: input.files } : {})

@@ -21,6 +21,12 @@ export type CatalogObject = {
   inlets: CatalogPort[];
   outlets: CatalogPort[];
   hasDoc: boolean;
+  /**
+   * 'node' has its own canvas node type, so a patch uses `type: "<name>"`.
+   * 'object-box' lives inside the generic `object` box, so a patch uses
+   * `type: "object"` with `data: { name, expr, params }`.
+   */
+  nodeKind: 'node' | 'object-box';
 };
 
 export type HandlePattern =
@@ -118,7 +124,10 @@ export function describeHandles(
 ): { inlets: string; outlets: string } {
   if (!spec && object) {
     const ids = (ports: CatalogPort[]) =>
-      ports.map((p) => p.handle).filter(Boolean).join(', ') || 'none declared in schema';
+      ports
+        .map((p) => p.handle)
+        .filter(Boolean)
+        .join(', ') || 'none declared in schema';
 
     return { inlets: ids(object.inlets), outlets: ids(object.outlets) };
   }
@@ -138,4 +147,42 @@ export function describeHandles(
   };
 
   return { inlets: describe(spec?.inlets), outlets: describe(spec?.outlets) };
+}
+
+/** How a patch must reference this object type. */
+export function usageExample(object: CatalogObject): {
+  nodeKind: CatalogObject['nodeKind'];
+  nodeType: string;
+  example: Record<string, unknown>;
+  note: string;
+} {
+  if (object.nodeKind === 'node') {
+    return {
+      nodeKind: 'node',
+      nodeType: object.name,
+      example: {
+        id: `${object.name}-1`,
+        type: object.name,
+        position: { x: 0, y: 0 },
+        data: {}
+      },
+      note: 'Use the object name directly as the node type.'
+    };
+  }
+
+  return {
+    nodeKind: 'object-box',
+    nodeType: 'object',
+    example: {
+      id: `${object.name}-1`,
+      type: 'object',
+      position: { x: 0, y: 0 },
+      data: { name: object.name, expr: object.name, params: [] }
+    },
+    note:
+      `"${object.name}" has no node component: it runs inside an object box. Use ` +
+      `type "object" and put the name plus space-separated arguments in data.expr ` +
+      `(e.g. "${object.name} 440"), with those arguments repeated in data.params. ` +
+      'Edge handles then follow the {audio|message|analysis}-{in|out}-N pattern.'
+  };
 }

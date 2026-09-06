@@ -23,10 +23,25 @@ import {
   loadCatalog,
   readObjectDoc,
   readTopicDoc,
-  searchObjects
+  searchObjects,
+  usageExample
 } from './catalog.js';
-import { bridgeStatus, callBridge, clearConsole, readConsole, startBridge, type BridgeOp } from './bridge.js';
-import { CURRENT_PATCH_VERSION, normalizePatch, validatePatch, type Patch } from './patch.js';
+import {
+  bridgeStatus,
+  callBridge,
+  clearConsole,
+  readConsole,
+  startBridge,
+  stopBridge,
+  type BridgeOp
+} from './bridge.js';
+import {
+  CURRENT_PATCH_VERSION,
+  edgeId,
+  normalizePatch,
+  validatePatch,
+  type Patch
+} from './patch.js';
 import { CONTENT_DIR, REPO_ROOT, UI_DIR } from './paths.js';
 import { scaffoldObject } from './scaffold.js';
 import {
@@ -43,9 +58,14 @@ import {
 
 const server = new McpServer({ name: 'patchies', version: '0.1.0' });
 
-const text = (value: string) => ({ content: [{ type: 'text' as const, text: value }] });
+const text = (value: string) => ({
+  content: [{ type: 'text' as const, text: value }]
+});
 const json = (value: unknown) => text(JSON.stringify(value, null, 2));
-const fail = (message: string) => ({ ...text(message), isError: true as const });
+const fail = (message: string) => ({
+  ...text(message),
+  isError: true as const
+});
 
 const resolvePath = (path: string) => (isAbsolute(path) ? path : join(REPO_ROOT, path));
 
@@ -57,7 +77,9 @@ server.registerTool(
     title: 'List Patchies objects',
     description:
       'Search the object catalog (name, category, description, tags, inlets/outlets). ' +
-      'Use this before authoring a patch so object types and ports are real.',
+      'Use this before authoring a patch so object types and ports are real. nodeKind tells ' +
+      'you how to place it: "node" means type: "<name>"; "object-box" means type: "object" ' +
+      'with data: { name, expr, params }.',
     inputSchema: {
       query: z.string().optional().describe('Substring matched against name, description and tags'),
       category: z.string().optional().describe('e.g. control, audio, programming'),
@@ -74,6 +96,7 @@ server.registerTool(
         name: o.name,
         category: o.category,
         description: o.description,
+        nodeKind: o.nodeKind,
         inlets: o.inlets.length,
         outlets: o.outlets.length,
         tags: o.tags
@@ -87,8 +110,8 @@ server.registerTool(
   {
     title: 'Inspect one object',
     description:
-      'Full schema for an object type: inlets, outlets, the exact handle IDs to use in edges, ' +
-      'and its user documentation.',
+      'Full schema for an object type: how to place it on the canvas (usage), inlets, outlets, ' +
+      'the exact handle IDs to use in edges, and its user documentation.',
     inputSchema: {
       name: z.string().describe('Object type, e.g. "metro", "js", "gain~", "ai.txt"'),
       includeDoc: z.boolean().optional().describe('Include the markdown docs (default true)')
@@ -108,6 +131,7 @@ server.registerTool(
       category: object.category,
       description: object.description,
       tags: object.tags,
+      usage: usageExample(object),
       inlets: object.inlets,
       outlets: object.outlets,
       handleIds: handles,
@@ -141,7 +165,10 @@ server.registerTool(
       timeoutMs: 20_000
     });
 
-    const lines = result.stdout.split('\n').filter(Boolean).slice(0, limit ?? 40);
+    const lines = result.stdout
+      .split('\n')
+      .filter(Boolean)
+      .slice(0, limit ?? 40);
 
     return lines.length ? text(lines.join('\n')) : text(`No documentation matches "${query}"`);
   }
@@ -157,7 +184,10 @@ server.registerTool(
     inputSchema: {}
   },
   async () => {
-    const sync = await runCommand(['bunx', 'svelte-kit', 'sync'], { cwd: UI_DIR, timeoutMs: 120_000 });
+    const sync = await runCommand(['bunx', 'svelte-kit', 'sync'], {
+      cwd: UI_DIR,
+      timeoutMs: 120_000
+    });
     const dump = await runCommand(['bun', '../mcp/scripts/dump-catalog.ts'], {
       cwd: UI_DIR,
       timeoutMs: 180_000
@@ -248,11 +278,75 @@ server.registerTool(
     await mkdir(dirname(target), { recursive: true });
     await writeFile(target, JSON.stringify(normalized, null, 2));
 
-    return json({ written: target, version: CURRENT_PATCH_VERSION, validation: result });
+    return json({
+      written: target,
+      version: CURRENT_PATCH_VERSION,
+      validation: result
+    });
   }
 );
 
 // ── 3. Live editor bridge ──────────────────────────────────────────────────
+
+/**
+ * insertMany + edges in two phases.
+ *
+ * The editor's multi-object insert validates edge handles against
+ * NODE_HANDLE_SPECS, which only covers 67 of the ~244 object types, so cables
+ * touching anything else (metro, float, send, gain~, ...) are silently dropped.
+ * Inserting the nodes first and then connecting by real node ID avoids that
+ * filter, which is exactly what a user dragging a cable would do.
+ */
+async function insertManyWithEdges(params: Record<string, unknown>): Promise<unknown> {
+  const nodes = (params.nodes as Record<string, unknown>[]) ?? [];
+  const edges = (params.edges as Record<string, unknown>[]) ?? [];
+
+  type Snapshot = { nodes: { id: string; type: string }[] };
+
+  const before = (await callBridge('snapshot')) as Snapshot;
+
+  await callBridge('insertMany', { nodes, position: params.position }, 30_000);
+
+  const after = (await callBridge('snapshot')) as Snapshot;
+  const created = after.nodes.slice(before.nodes.length);
+
+  if (created.length !== nodes.length) {
+    return {
+      inserted: created.length,
+      connected: 0,
+      warning: `expected ${nodes.length} new nodes but found ${created.length}; edges were not connected`
+    };
+  }
+
+  const resolved = edges.map((edge) => {
+    const source = created[Number(edge.source)];
+    const target = created[Number(edge.target)];
+
+    if (!source || !target) {
+      throw new Error(
+        `edge {source: ${edge.source}, target: ${edge.target}} points outside the nodes array ` +
+          `(insertMany edges use 0-based INDEXES into "nodes")`
+      );
+    }
+
+    const shape = {
+      source: source.id,
+      target: target.id,
+      sourceHandle: (edge.sourceHandle as string) ?? null,
+      targetHandle: (edge.targetHandle as string) ?? null
+    };
+
+    return { id: edgeId(shape), ...shape };
+  });
+
+  if (resolved.length) await callBridge('connect', { edges: resolved });
+
+  return {
+    inserted: created.length,
+    connected: resolved.length,
+    nodeIds: created.map((n) => n.id)
+  };
+}
 
 server.registerTool(
   'live_snapshot',
@@ -281,26 +375,56 @@ server.registerTool(
     title: 'Change the running patch',
     description:
       'Applies a canvas operation to the connected editor using the same code path as the built-in ' +
-      'AI chat: insert, insertMany, edit, replace, connect, disconnect, delete, move.',
+      'AI chat: insert, insertMany, edit, replace, connect, disconnect, delete, move. ' +
+      'Note the two edge shapes: insertMany uses node INDEXES, connect uses node IDs.',
     inputSchema: {
-      op: z.enum(['insert', 'insertMany', 'edit', 'replace', 'connect', 'disconnect', 'delete', 'move']),
+      op: z.enum([
+        'insert',
+        'insertMany',
+        'edit',
+        'replace',
+        'connect',
+        'disconnect',
+        'delete',
+        'move'
+      ]),
       type: z.string().optional().describe('insert/replace: object type'),
       data: z.record(z.unknown()).optional().describe('insert/edit/replace: node data'),
       position: z.object({ x: z.number(), y: z.number() }).optional(),
       nodeId: z.string().optional().describe('edit/replace target'),
       nodeIds: z.array(z.string()).optional().describe('delete targets'),
-      nodes: z.array(z.record(z.unknown())).optional().describe('insertMany nodes'),
-      edges: z.array(z.record(z.unknown())).optional().describe('insertMany/connect edges'),
+      nodes: z
+        .array(z.record(z.unknown()))
+        .optional()
+        .describe('insertMany: [{ type, data, position? }] — ids are assigned by the editor'),
+      edges: z
+        .array(z.record(z.unknown()))
+        .optional()
+        .describe(
+          'insertMany: [{ source, target, sourceHandle, targetHandle }] where source/target are ' +
+            'INDEXES into the nodes array. connect: real XYFlow edges with { id, source, ' +
+            'sourceHandle, target, targetHandle } node IDs.'
+        ),
       edgeIds: z.array(z.string()).optional().describe('disconnect targets'),
       positions: z
-        .array(z.object({ nodeId: z.string(), position: z.object({ x: z.number(), y: z.number() }) }))
+        .array(
+          z.object({
+            nodeId: z.string(),
+            position: z.object({ x: z.number(), y: z.number() })
+          })
+        )
         .optional()
         .describe('move targets')
     }
   },
   async ({ op, ...params }) => {
     try {
-      const result = await callBridge(op as BridgeOp, params as Record<string, unknown>);
+      const args = params as Record<string, unknown>;
+
+      const result =
+        op === 'insertMany' && Array.isArray(args.edges) && args.edges.length > 0
+          ? await insertManyWithEdges(args)
+          : await callBridge(op as BridgeOp, args);
 
       return json({ op, result });
     } catch (error) {
@@ -446,10 +570,18 @@ server.registerTool(
 
 // ── Boot ───────────────────────────────────────────────────────────────────
 
-try {
-  startBridge();
-} catch (error) {
-  console.error(`[patchies-mcp] bridge failed to start: ${(error as Error).message}`);
-}
+const bridge = startBridge();
 
-await server.connect(new StdioServerTransport());
+if (bridge.error) console.error(`[patchies-mcp] ${bridge.error}`);
+
+const transport = new StdioServerTransport();
+
+// Without this the WebSocket server keeps the process alive after the MCP client
+// disconnects, and the next run cannot bind the bridge port.
+transport.onclose = () => {
+  stopBridge();
+  stopDevServer();
+  process.exit(0);
+};
+
+await server.connect(transport);

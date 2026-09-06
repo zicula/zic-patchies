@@ -17,12 +17,17 @@ Fork of [heypoom/patchies](https://github.com/heypoom/patchies) (AGPL-3.0) that 
 1. **Use the `patchies` MCP tools before reading source.** `list_objects` / `object_info`
    answer "what objects exist and which handle IDs do edges need" faster and more
    accurately than grepping.
-2. **Never hand-write a patch without `validate_patch`.** Wrong handle IDs are the most
-   common failure and they fail silently in the app.
-3. **Keep upstream files untouched when a change can live in `mcp/`.** Every extra line in
+2. **Check `nodeKind` before writing a node.** Only ~127 objects have their own canvas
+   node (`type: "<name>"`); the rest live in an `object` box
+   (`type: "object"`, `data: { name, expr, params }`) and their handles are
+   `{audio|message|analysis}-{in|out}-N`. Getting this wrong produces a patch that
+   silently fails to load.
+3. **Never hand-write a patch without `validate_patch`.** Wrong handle IDs and node kinds
+   are the most common failures and both fail silently in the app.
+4. **Keep upstream files untouched when a change can live in `mcp/`.** Every extra line in
    `ui/` is a future merge conflict.
-4. **After `sync_upstream`, run `refresh_catalog`** — object schemas change upstream.
-5. `run_task check` (svelte-check) must stay at 0 errors before committing.
+5. **After `sync_upstream`, run `refresh_catalog`** — object schemas change upstream.
+6. `run_task check` (svelte-check) must stay at 0 errors before committing.
 
 ## Quick start
 

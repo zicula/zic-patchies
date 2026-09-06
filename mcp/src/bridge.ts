@@ -38,6 +38,7 @@ export type ConsoleEntry = {
 const CONSOLE_LIMIT = 300;
 
 let server: ReturnType<typeof Bun.serve> | null = null;
+let startError: string | null = null;
 let socket: ServerWebSocket<unknown> | null = null;
 let clientInfo: { connectedAt: number; url?: string } | null = null;
 let nextId = 1;
@@ -55,7 +56,10 @@ function handleMessage(raw: string): void {
   }
 
   if (payload.type === 'hello') {
-    clientInfo = { connectedAt: Date.now(), url: payload.url as string | undefined };
+    clientInfo = {
+      connectedAt: Date.now(),
+      url: payload.url as string | undefined
+    };
     return;
   }
 
@@ -83,34 +87,51 @@ function handleMessage(raw: string): void {
 }
 
 /** Starts the bridge server once; safe to call repeatedly. */
-export function startBridge(): { port: number } {
-  if (server) return { port: BRIDGE_PORT };
+export function startBridge(): { port: number; error: string | null } {
+  if (server) return { port: BRIDGE_PORT, error: null };
 
-  server = Bun.serve({
-    port: BRIDGE_PORT,
-    fetch(req, srv) {
-      if (srv.upgrade(req)) return undefined;
+  try {
+    server = Bun.serve({
+      port: BRIDGE_PORT,
+      fetch(req, srv) {
+        if (srv.upgrade(req)) return undefined;
 
-      return new Response('patchies mcp bridge', { status: 200 });
-    },
-    websocket: {
-      open(ws) {
-        socket = ws;
-        clientInfo = { connectedAt: Date.now() };
+        return new Response('patchies mcp bridge', { status: 200 });
       },
-      message(_ws, message) {
-        handleMessage(typeof message === 'string' ? message : new TextDecoder().decode(message));
-      },
-      close(ws) {
-        if (socket === ws) {
-          socket = null;
-          clientInfo = null;
+      websocket: {
+        open(ws) {
+          socket = ws;
+          clientInfo = { connectedAt: Date.now() };
+        },
+        message(_ws, message) {
+          handleMessage(typeof message === 'string' ? message : new TextDecoder().decode(message));
+        },
+        close(ws) {
+          if (socket === ws) {
+            socket = null;
+            clientInfo = null;
+          }
         }
       }
-    }
-  });
+    });
 
-  return { port: BRIDGE_PORT };
+    startError = null;
+  } catch (error) {
+    startError =
+      `cannot listen on port ${BRIDGE_PORT}: ${(error as Error).message}. ` +
+      'Another MCP server instance is probably still running — stop it, or set ' +
+      'PATCHIES_MCP_BRIDGE_PORT to a free port (and localStorage["patchies:mcpBridgePort"] to match).';
+  }
+
+  return { port: BRIDGE_PORT, error: startError };
+}
+
+/** Stops the bridge server. Used when the MCP client disconnects. */
+export function stopBridge(): void {
+  server?.stop(true);
+  server = null;
+  socket = null;
+  clientInfo = null;
 }
 
 export function bridgeStatus(): {
@@ -119,13 +140,15 @@ export function bridgeStatus(): {
   connected: boolean;
   client: { connectedAt: number; url?: string } | null;
   consoleEntries: number;
+  error: string | null;
 } {
   return {
     listening: server !== null,
     port: BRIDGE_PORT,
     connected: socket !== null,
     client: clientInfo,
-    consoleEntries: consoleLog.length
+    consoleEntries: consoleLog.length,
+    error: startError
   };
 }
 
@@ -135,6 +158,8 @@ export async function callBridge(
   timeoutMs = 10_000
 ): Promise<unknown> {
   startBridge();
+
+  if (startError) throw new Error(`Bridge is not listening — ${startError}`);
 
   if (!socket) {
     throw new Error(

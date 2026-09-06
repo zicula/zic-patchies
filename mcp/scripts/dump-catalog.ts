@@ -10,7 +10,7 @@
  * regenerated after syncing upstream.
  */
 
-import { mkdir, readdir, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -30,6 +30,29 @@ type Schema = {
   outlets?: Port[];
   tags?: string[];
 };
+
+/**
+ * Object types that have their own XYFlow node component. Everything else lives
+ * inside an `object` box, so a patch must say `type: "object"` with
+ * `data: { name, expr, params }` instead of naming the object type directly.
+ *
+ * Parsed rather than imported because node-types.ts pulls in Svelte components.
+ */
+async function readNodeTypeKeys(): Promise<Set<string>> {
+  const source = await readFile(join(uiSrc, 'lib', 'nodes', 'node-types.ts'), 'utf8');
+  const body = source.slice(source.indexOf('export const nodeTypes'));
+  const keys = new Set<string>();
+
+  for (const match of body.matchAll(/^\s{2}'?([A-Za-z0-9._~-]+)'?:\s/gm)) {
+    keys.add(match[1]);
+  }
+
+  if (keys.size < 50) throw new Error(`only parsed ${keys.size} node types — parser is stale`);
+
+  return keys;
+}
+
+const nodeTypeKeys = await readNodeTypeKeys();
 
 const schemasModule = await import(join(uiSrc, 'lib', 'objects', 'schemas', 'index.ts'));
 const handlesModule = await import(join(uiSrc, 'lib', 'ai', 'debug', 'handle-specs.ts'));
@@ -70,7 +93,8 @@ const objects = Object.entries(schemas)
     tags: schema.tags ?? [],
     inlets: (schema.inlets ?? []).map((p) => port(p, 'inlet')),
     outlets: (schema.outlets ?? []).map((p) => port(p, 'outlet')),
-    hasDoc: docNames.has(name)
+    hasDoc: docNames.has(name),
+    nodeKind: nodeTypeKeys.has(name) ? ('node' as const) : ('object-box' as const)
   }))
   .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -85,7 +109,8 @@ const documentedOnly = [...docNames]
     tags: [] as string[],
     inlets: [] as ReturnType<typeof port>[],
     outlets: [] as ReturnType<typeof port>[],
-    hasDoc: true
+    hasDoc: true,
+    nodeKind: nodeTypeKeys.has(name) ? ('node' as const) : ('object-box' as const)
   }));
 
 if (typeof deriveHandleId !== 'function') throw new Error('deriveHandleId export not found');
@@ -95,7 +120,8 @@ const catalog = {
   counts: {
     withSchema: objects.length,
     docsOnly: documentedOnly.length,
-    handleSpecs: Object.keys(handleSpecs).length
+    handleSpecs: Object.keys(handleSpecs).length,
+    nodeTypes: nodeTypeKeys.size
   },
   objects: [...objects, ...documentedOnly],
   handleSpecs,

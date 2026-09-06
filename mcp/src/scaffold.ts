@@ -9,7 +9,12 @@ import { join } from 'node:path';
 
 import { OBJECT_DOCS_DIR, UI_SRC } from './paths.js';
 
-export type ScaffoldPort = { name: string; type?: string; description?: string; defaultValue?: unknown };
+export type ScaffoldPort = {
+  name: string;
+  type?: string;
+  description?: string;
+  defaultValue?: unknown;
+};
 
 export type ScaffoldInput = {
   name: string;
@@ -34,7 +39,8 @@ function renderPort(port: ScaffoldPort): string {
   const parts = [`name: '${port.name}'`, `type: '${port.type ?? 'message'}'`];
 
   if (port.description) parts.push(`description: '${port.description.replace(/'/g, "\\'")}'`);
-  if (port.defaultValue !== undefined) parts.push(`defaultValue: ${JSON.stringify(port.defaultValue)}`);
+  if (port.defaultValue !== undefined)
+    parts.push(`defaultValue: ${JSON.stringify(port.defaultValue)}`);
 
   return `    { ${parts.join(', ')} }`;
 }
@@ -92,7 +98,9 @@ ${inletCases}
 }
 
 function renderDoc(input: ScaffoldInput): string {
-  const inlets = input.inlets?.length ? input.inlets : [{ name: 'message', description: 'Incoming message' }];
+  const inlets = input.inlets?.length
+    ? input.inlets
+    : [{ name: 'message', description: 'Incoming message' }];
   const outlets = input.outlets?.length ? input.outlets : [{ name: 'out', description: 'Result' }];
 
   return `${input.description}
@@ -112,7 +120,10 @@ ${outlets.map((o) => `- \`${o.name}\` — ${o.description ?? ''}`).join('\n')}
 }
 
 /** Adds the import + TEXT_OBJECTS entry in ui/src/lib/objects/v2/nodes/index.ts. */
-async function registerObject(name: string, className: string): Promise<'registered' | 'already-registered'> {
+async function registerObject(
+  name: string,
+  className: string
+): Promise<'registered' | 'already-registered'> {
   const source = await readFile(V2_REGISTRY, 'utf8');
 
   if (source.includes(`${className},`) || source.includes(`{ ${className} }`)) {
@@ -130,8 +141,7 @@ async function registerObject(name: string, className: string): Promise<'registe
 
   if (arrayEnd === -1) throw new Error('TEXT_OBJECTS array not found in v2/nodes/index.ts');
 
-  const updated =
-    withImport.slice(0, arrayEnd) + `,\n  ${className}` + withImport.slice(arrayEnd);
+  const updated = withImport.slice(0, arrayEnd) + `,\n  ${className}` + withImport.slice(arrayEnd);
 
   await writeFile(V2_REGISTRY, updated);
 

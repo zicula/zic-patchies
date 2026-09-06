@@ -20,14 +20,27 @@ const TASKS: Record<TaskName, { cwd: string; command: string[] }> = {
   format: { cwd: UI_DIR, command: ['bun', 'run', 'format'] },
   test: { cwd: UI_DIR, command: ['bun', 'run', 'test:unit'] },
   build: { cwd: UI_DIR, command: ['bun', 'run', 'build'] },
-  'generate-schemas': { cwd: UI_DIR, command: ['bun', 'run', 'generate:schemas'] },
-  'server-test': { cwd: `${REPO_ROOT}/server`, command: ['go', 'test', './...'] },
-  'docker-build': { cwd: REPO_ROOT, command: ['docker', 'build', '-t', 'patchies', '.'] }
+  'generate-schemas': {
+    cwd: UI_DIR,
+    command: ['bun', 'run', 'generate:schemas']
+  },
+  'server-test': {
+    cwd: `${REPO_ROOT}/server`,
+    command: ['go', 'test', './...']
+  },
+  'docker-build': {
+    cwd: REPO_ROOT,
+    command: ['docker', 'build', '-t', 'patchies', '.']
+  }
 };
 
 export const TASK_NAMES = Object.keys(TASKS) as TaskName[];
 
-export type CommandResult = { exitCode: number; stdout: string; stderr: string };
+export type CommandResult = {
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+};
 
 export function runCommand(
   command: string[],
@@ -45,16 +58,13 @@ export function runCommand(
     let stderr = '';
     let settled = false;
 
-    const timer = setTimeout(
-      () => {
-        if (settled) return;
+    const timer = setTimeout(() => {
+      if (settled) return;
 
-        child.kill('SIGKILL');
-        settled = true;
-        resolve({ exitCode: 124, stdout, stderr: `${stderr}\n[timed out]` });
-      },
-      options.timeoutMs ?? 300_000
-    );
+      child.kill('SIGKILL');
+      settled = true;
+      resolve({ exitCode: 124, stdout, stderr: `${stderr}\n[timed out]` });
+    }, options.timeoutMs ?? 300_000);
 
     child.stdout.on('data', (chunk) => (stdout += chunk.toString()));
     child.stderr.on('data', (chunk) => (stderr += chunk.toString()));
@@ -118,7 +128,11 @@ export async function devServerStatus(): Promise<{
   };
 }
 
-export async function startDevServer(): Promise<{ started: boolean; message: string; url: string }> {
+export async function startDevServer(): Promise<{
+  started: boolean;
+  message: string;
+  url: string;
+}> {
   const url = `http://localhost:${DEV_PORT}/`;
 
   if (await isDevPortOpen()) {
@@ -140,13 +154,21 @@ export async function startDevServer(): Promise<{ started: boolean; message: str
   while (Date.now() < deadline) {
     if (await isDevPortOpen()) return { started: true, message: `Dev server ready at ${url}`, url };
     if (devServer.exitCode !== null) {
-      return { started: false, message: `Dev server exited: ${devLog.slice(-1000)}`, url };
+      return {
+        started: false,
+        message: `Dev server exited: ${devLog.slice(-1000)}`,
+        url
+      };
     }
 
     await new Promise((r) => setTimeout(r, 1000));
   }
 
-  return { started: false, message: `Dev server did not answer in 90s: ${devLog.slice(-1000)}`, url };
+  return {
+    started: false,
+    message: `Dev server did not answer in 90s: ${devLog.slice(-1000)}`,
+    url
+  };
 }
 
 export function stopDevServer(): { stopped: boolean } {
@@ -161,12 +183,14 @@ export function stopDevServer(): { stopped: boolean } {
 // ── Upstream sync ──────────────────────────────────────────────────────────
 
 export async function upstreamStatus(): Promise<CommandResult> {
-  await runCommand(['git', 'fetch', 'upstream'], { cwd: REPO_ROOT, timeoutMs: 120_000 });
+  await runCommand(['git', 'fetch', 'upstream'], {
+    cwd: REPO_ROOT,
+    timeoutMs: 120_000
+  });
 
-  return runCommand(
-    ['git', 'log', '--oneline', '--no-decorate', 'HEAD..upstream/main'],
-    { cwd: REPO_ROOT }
-  );
+  return runCommand(['git', 'log', '--oneline', '--no-decorate', 'HEAD..upstream/main'], {
+    cwd: REPO_ROOT
+  });
 }
 
 export async function syncUpstream(

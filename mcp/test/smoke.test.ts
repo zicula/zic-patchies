@@ -52,7 +52,10 @@ test('exposes the expected tools', async () => {
 
 test('object_info returns real handle IDs', async () => {
   const payload = await withClient(async (client) => {
-    const result = await client.callTool({ name: 'object_info', arguments: { name: 'metro', includeDoc: false } });
+    const result = await client.callTool({
+      name: 'object_info',
+      arguments: { name: 'metro', includeDoc: false }
+    });
 
     return JSON.parse(textOf(result));
   });
@@ -72,7 +75,9 @@ test('validate_patch rejects unknown types and bad handles', async () => {
             { id: 'a', type: 'definitely-not-an-object', position: { x: 0, y: 0 }, data: {} },
             { id: 'b', type: 'metro', position: { x: 100, y: 0 }, data: {} }
           ],
-          edges: [{ source: 'b', target: 'ghost', sourceHandle: 'nope', targetHandle: 'message-in' }]
+          edges: [
+            { source: 'b', target: 'ghost', sourceHandle: 'nope', targetHandle: 'message-in' }
+          ]
         }
       }
     });
@@ -110,4 +115,88 @@ test('live tools report a disconnected bridge instead of hanging', async () => {
 
   expect(payload.bridge.connected).toBe(false);
   expect(payload.graph).toBe(null);
+});
+
+test('object_info explains how to place an object-box type', async () => {
+  const payload = await withClient(async (client) => {
+    const result = await client.callTool({
+      name: 'object_info',
+      arguments: { name: 'metro', includeDoc: false }
+    });
+
+    return JSON.parse(textOf(result));
+  });
+
+  expect(payload.usage.nodeKind).toBe('object-box');
+  expect(payload.usage.nodeType).toBe('object');
+  expect(payload.usage.example.data.name).toBe('metro');
+});
+
+test('validate_patch rejects an object-box type used as a node type', async () => {
+  const report = await withClient(async (client) => {
+    const result = await client.callTool({
+      name: 'validate_patch',
+      arguments: {
+        patch: {
+          name: 'metro as node type',
+          nodes: [{ id: 'metro-1', type: 'metro', position: { x: 0, y: 0 }, data: {} }],
+          edges: []
+        }
+      }
+    });
+
+    return JSON.parse(textOf(result));
+  });
+
+  expect(report.ok).toBe(false);
+  expect(report.issues.map((i: { message: string }) => i.message).join(' ')).toContain(
+    'has no node component'
+  );
+});
+
+test('validate_patch accepts a correct object box', async () => {
+  const report = await withClient(async (client) => {
+    const result = await client.callTool({
+      name: 'validate_patch',
+      arguments: {
+        patch: {
+          name: 'metro in a box',
+          nodes: [
+            {
+              id: 'metro-1',
+              type: 'object',
+              position: { x: 0, y: 0 },
+              data: { name: 'metro', expr: 'metro 500', params: [500] }
+            },
+            { id: 'js-1', type: 'js', position: { x: 0, y: 160 }, data: {} }
+          ],
+          edges: [
+            {
+              source: 'metro-1',
+              sourceHandle: 'message-out-0',
+              target: 'js-1',
+              targetHandle: 'in-0'
+            }
+          ]
+        }
+      }
+    });
+
+    return JSON.parse(textOf(result));
+  });
+
+  expect(report.ok).toBe(true);
+});
+
+test('the bundled example patch stays valid', async () => {
+  const report = await withClient(async (client) => {
+    const result = await client.callTool({
+      name: 'validate_patch',
+      arguments: { path: 'mcp/examples/metro-js.json' }
+    });
+
+    return JSON.parse(textOf(result));
+  });
+
+  expect(report.ok).toBe(true);
 });
