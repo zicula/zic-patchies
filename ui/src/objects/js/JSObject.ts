@@ -62,6 +62,8 @@ export class JSObject implements RuntimeObject<JSObjectData> {
     const data = this.context.getData<JSObjectData>();
     this.lastExecuteCode = data.executeCode;
 
+    this.resetRuntimeIndicators();
+
     if (data.runOnMount) {
       await this.execute();
     }
@@ -133,14 +135,7 @@ export class JSObject implements RuntimeObject<JSObjectData> {
     messageContext.onAnimationFrameCallbackRegistered = () =>
       this.context.setData({ isTimerCallbackActive: true }, { notifyUI: true });
 
-    this.context.setData(
-      {
-        isGraphSubscriptionActive: false,
-        isMessageCallbackActive: false,
-        isTimerCallbackActive: false
-      },
-      { notifyUI: true }
-    );
+    this.resetRuntimeIndicators();
 
     const data = this.context.getData<JSObjectData>();
     const code = typeof data.code === 'string' ? data.code : '';
@@ -153,6 +148,9 @@ export class JSObject implements RuntimeObject<JSObjectData> {
       await runner.executeJavaScript(this.nodeId, processedCode, {
         customConsole,
         messageContext,
+
+        onSchedulerCallbackRegistered: () =>
+          this.context.setData({ isTimerCallbackActive: true }, { notifyUI: true }),
 
         setPortCount: (inletCount = 1, outletCount = 1) =>
           this.context.setData({ inletCount, outletCount }, { notifyUI: true }),
@@ -182,7 +180,6 @@ export class JSObject implements RuntimeObject<JSObjectData> {
           };
 
           const unsubscribe = this.context.subscribeGraph(query, notifyGraphChange);
-
           if (!unsubscribe) return () => {};
 
           this.subscriptions.add(unsubscribe);
@@ -214,15 +211,27 @@ export class JSObject implements RuntimeObject<JSObjectData> {
     this.context.setData({ isGraphSubscriptionActive: false }, { notifyUI: true });
   }
 
+  private resetRuntimeIndicators(): void {
+    this.context.setData(
+      {
+        isGraphSubscriptionActive: false,
+        isMessageCallbackActive: false,
+        isTimerCallbackActive: false
+      },
+      { notifyUI: true }
+    );
+  }
+
   private stop(): void {
     this.clearSubscriptions();
     this.settingsManager.clearCallbacks();
 
     const messageContext = this.context.getMessageContext();
-
     messageContext.runCleanupCallbacks();
     messageContext.clearTimers();
     messageContext.messageCallbacks = [];
+
+    JSRunner.getInstance().clearSchedulerCallbacks(this.nodeId);
 
     const updates = {
       isGraphSubscriptionActive: false,
