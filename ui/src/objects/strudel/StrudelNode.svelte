@@ -26,6 +26,11 @@
     openDetachedStrudelEditor
   } from '../../stores/detached-strudel-editor.store';
   import { overlayEditorTransparency } from '../../stores/editor-layout-settings.store';
+  import {
+    editorFontFamily,
+    editorFontSize,
+    editorFullscreenTextBackgroundOpacity
+  } from '../../stores/editor.store';
   import { useCodeSidebarTarget } from '$lib/code-editor/use-code-sidebar-target.svelte';
   import {
     getExpandedDismissShortcutLabel,
@@ -70,6 +75,8 @@
   let menuOpen = $state(false);
 
   const code = $derived(data.code || '');
+  const fontFamily = $derived(data.fontFamily ?? $editorFontFamily);
+  const fontSize = $derived(data.fontSize ?? $editorFontSize);
   const dismissShortcutLabel = $derived(getExpandedDismissShortcutLabel($isNativeFullscreen));
   const customConsole = createCustomConsole(initialNodeId());
 
@@ -252,6 +259,9 @@
   );
 
   const detachedBackground = $derived(`rgba(9, 9, 11, ${$overlayEditorTransparency})`);
+  const detachedTextBackground = $derived(
+    `rgba(9, 9, 11, ${$editorFullscreenTextBackgroundOpacity / 100})`
+  );
   const tracker = useNodeDataTracker(initialNodeId());
 
   function setSyncTransport(value: boolean) {
@@ -496,11 +506,12 @@
               'strudel-editor-shell nodrag nowheel overflow-auto',
               isDetached ? 'h-full w-full' : 'max-h-[600px] max-w-[800px]'
             ]}
+            style:--fullscreen-text-background={isDetached ? detachedTextBackground : undefined}
           >
             <StrudelEditor
               {code}
-              fontFamily={data.fontFamily}
-              fontSize={data.fontSize}
+              {fontFamily}
+              {fontSize}
               bind:this={strudelEditor}
               onUpdateState={handleUpdateState}
               onBeforeEvaluate={() => {
@@ -567,7 +578,9 @@
   }
 
   :global(.strudel-detached-editor .strudel-editor-shell .cm-line) {
+    width: fit-content;
     padding: 0 8px !important;
+    background: var(--fullscreen-text-background);
   }
 
   :global(.strudel-detached-editor .strudel-editor-shell .cm-scroller) {
