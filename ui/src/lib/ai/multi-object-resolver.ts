@@ -10,7 +10,7 @@
 import { OBJECT_TYPE_LIST } from './object-descriptions';
 import { buildMultiObjectInstructionParts } from './object-prompts/build-generator-instructions';
 import { generateHandleDocs } from './generate-handle-docs';
-import { extractJson } from './extract-json';
+import { AiResponseError, parseObjectResponse } from './parse-object-response';
 import { getTextProvider } from './providers';
 import type { LLMProvider } from './providers';
 
@@ -117,7 +117,7 @@ async function routeToMultiObjectPlan(
   prompt: string,
   signal?: AbortSignal,
   onThinking?: (thought: string) => void
-): Promise<{ objectTypes: string[]; structure: string } | null> {
+): Promise<{ objectTypes: string[]; structure: string; explanation?: string } | null> {
   if (signal?.aborted) throw new Error('Request cancelled');
 
   const routerPrompt = buildMultiObjectRouterPrompt();
@@ -133,8 +133,7 @@ async function routeToMultiObjectPlan(
   }
 
   try {
-    const jsonText = extractJson(responseText.trim());
-    const result = JSON.parse(jsonText);
+    const { value: result, explanation } = parseObjectResponse(responseText);
 
     if (!result.objectTypes || !Array.isArray(result.objectTypes)) {
       throw new Error('Response missing required "objectTypes" array');
@@ -147,11 +146,15 @@ async function routeToMultiObjectPlan(
     logger.log('✅ [Router] Object types', result.objectTypes);
     logger.log('✅ [Router] Connection structure', result.structure);
 
-    return result;
+    return { ...result, explanation };
   } catch (error) {
     logger.error('[Router] Failed to parse response', error);
     logger.log('Raw response text', responseText);
-    throw new Error('Failed to parse routing response as JSON');
+
+    throw new AiResponseError(
+      error instanceof Error ? error.message : 'Failed to parse routing response as JSON',
+      responseText
+    );
   }
 }
 
@@ -161,7 +164,7 @@ async function routeToMultiObjectPlan(
 async function generateMultiObjectConfig(
   provider: LLMProvider,
   prompt: string,
-  plan: { objectTypes: string[]; structure: string },
+  plan: { objectTypes: string[]; structure: string; explanation?: string },
   signal?: AbortSignal,
   onThinking?: (thought: string) => void
 ): Promise<MultiObjectResult | null> {
@@ -180,8 +183,7 @@ async function generateMultiObjectConfig(
   }
 
   try {
-    const jsonText = extractJson(responseText.trim());
-    const result = JSON.parse(jsonText);
+    const { value: result, explanation } = parseObjectResponse(responseText);
 
     if (!result.nodes || !Array.isArray(result.nodes)) {
       throw new Error('Response missing required "nodes" array');
@@ -199,11 +201,18 @@ async function generateMultiObjectConfig(
     logger.log('✅ [Generator] Nodes created', result.nodes);
     logger.log('✅ [Generator] Edges created', result.edges);
 
-    return { nodes: result.nodes, edges: result.edges };
+    return {
+      nodes: result.nodes,
+      edges: result.edges,
+      explanation: [plan.explanation, explanation].filter(Boolean).join('\n\n') || undefined
+    };
   } catch (error) {
     logger.error('[Generator] Failed to parse response', error);
     logger.log('Raw response text', responseText);
-    throw new Error('Failed to parse generation response as JSON');
+    throw new AiResponseError(
+      error instanceof Error ? error.message : 'Failed to parse generation response as JSON',
+      responseText
+    );
   }
 }
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { useSelectionChange } from '$lib/canvas/use-selection-change.svelte';
   import {
     NodeResizer,
     NodeResizeControl,
@@ -117,6 +118,12 @@
 
     p5.resizeCanvas(nextWidth, nextHeight);
 
+    if (surfaceMode.isExpanded) {
+      const canvas = (p5 as unknown as { canvas: HTMLCanvasElement }).canvas;
+
+      surfaceMode.styleCanvas(canvas, { width: nextWidth, height: nextHeight });
+    }
+
     preloadCanvasWidth = nextWidth;
     preloadCanvasHeight = nextHeight;
 
@@ -214,6 +221,12 @@
 
   // Create custom console for routing output to VirtualConsole
   const customConsole = createCustomConsole(initialNodeId());
+
+  const selection = useSelectionChange({
+    getSelected: () => !!selected,
+    onError: (error) =>
+      handleRuntimeError(error instanceof Error ? error : new Error(String(error)))
+  });
 
   // Track error line numbers for code highlighting
   let lineErrors = $state<Record<number, string[]> | undefined>(undefined);
@@ -352,6 +365,8 @@
         p5Manager.shouldSendBitmap = !surfaceMode.isExpanded;
         surfaceMode.setMouseForwarding();
 
+        selection.reset();
+
         updateNodeData(nodeId, getBorderResetDataForRun(data));
 
         await p5Manager.updateCode({
@@ -380,6 +395,7 @@
             setTitle: (title: string) => {
               updateNodeData(nodeId, { title });
             },
+            onSelectionChange: selection.onSelectionChange,
             noBorder: () => {
               updateNodeData(nodeId, { noBorder: true });
             }

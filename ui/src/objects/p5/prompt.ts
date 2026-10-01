@@ -19,7 +19,11 @@ ${esmInstructions}
 - noWheel() - Disable XYFlow canvas wheel zoom when interacting
 - noInteract() - Disable all XYFlow canvas interactions (drag, pan, wheel)
 - noBorder() - Hide Patchies border and selected glow
+- onSelectionChange(callback): Calls callback(selected) immediately with current canvas selection, then only when it changes. Returns an unsubscribe function; subscriptions clear on rerun or destruction. Selection is separate from keyboard focus.
 - setVideoOutput(enabled) - Enable or disable the video output port. It is disabled by default; call setVideoOutput(true) only when the sketch feeds another video node.
+
+When using noBorder() for a custom widget, use onSelectionChange() to keep a visible selection indicator that matches its theme and geometry, including rounded or inset borders. Store selected in a variable and use it in draw() or redraw the scene from the callback, including for paused or static widgets. Register after any drawing resources used by the callback exist, because the initial callback runs immediately.
+
 - setFluidSize({ showResizer?, resize?, keepAspectRatio? }) - Make the canvas follow a user-resized node. createCanvas() supplies the initial size; do not pass initialSize.
 - createSurfaceCanvas(renderer?) - Create a transparent renderer-output-sized canvas and enable Expand so the p5 sketch can run as a fullscreen surface overlay. Do NOT also call createCanvas() when using this.
 - expandSurface() / collapseSurface() - In p5 surface mode, enter or exit fullscreen surface mode from code.
@@ -30,7 +34,8 @@ ${esmInstructions}
 **Default behaviors to apply unless there's a reason not to:**
 - Call setVideoOutput(true) only when the sketch is explicitly meant to output video to another node.
 - For fullscreen transparent overlays over Hydra/GLSL/video output, call createSurfaceCanvas() in setup() instead of createCanvas(), and use clear() in draw() so visuals underneath show through.
-- For a resizable inline sketch, call setFluidSize() and createCanvas(width, height) in setup(). Do not combine setFluidSize() with createSurfaceCanvas().
+- Default to fluid sizing for inline sketches: call setFluidSize({ showResizer: false }) and createCanvas(width, height) in setup(). Do not combine setFluidSize() with createSurfaceCanvas().
+- Pass showResizer: false by default; use showResizer: true only when visible resize handles are explicitly requested. Users can enable resizing from the node overflow menu.
 - In p5 surface mode, use setMouseForwarding() when only some render nodes should receive mouse/wheel interaction, and setMouseForwarding({ enabled: false }) when p5 should consume interaction without driving Hydra/GLSL/Three.
 - Call noDrag() if the sketch uses mousePressed, mouseDragged, mouseX/mouseY interaction.
 - Call noWheel() if the sketch uses scroll or mouseWheel interaction.
@@ -47,8 +52,13 @@ ${esmInstructions}
 - NEVER use windowWidth or windowHeight — the node is embedded in a canvas at a small size.
 - Acceptable size range: 200×150 minimum, 1000×1000 maximum. Prefer smaller when possible.
 
+**Responsive layout:**
+- Fill the outer container edge to edge. Do not add outer padding or margins unless explicitly requested.
+- Recompute layout and UI scale from live width and height in draw(). Scale text, controls, hit areas, shapes, and line widths with the resized canvas, not just their positions. Do not cache the initial dimensions for layout.
+- For sketches using noLoop(), redraw after resizing so layout and UI scale update.
+
 **Font & element sizes:**
-- The node is displayed very zoomed out in the patch canvas. Use large font sizes (18px minimum, 24–32px for primary text) so text remains readable.
+- The node is displayed very zoomed out in the patch canvas. Use large font sizes (18px minimum, 24–32px for primary text) at the initial size, and grow these font sizes with the UI scale so text stays big and readable as the node grows.
 - Similarly, make shapes, lines, and UI elements larger than you would for a full-screen sketch.
 
 ${typographyInstructions}
@@ -62,7 +72,7 @@ Example:
 {
   "type": "p5",
   "data": {
-    "code": "function setup() { createCanvas(252, 164); }\\nfunction draw() { background(220); textSize(24); text('hello', 20, 80); }"
+    "code": "function setup() { setFluidSize({ showResizer: false }); createCanvas(252, 164); }\\nfunction draw() { background(220); textSize(24 * min(width / 252, height / 164)); textAlign(CENTER, CENTER); text('hello', width / 2, height / 2); }"
   }
 }
 \`\`\``;

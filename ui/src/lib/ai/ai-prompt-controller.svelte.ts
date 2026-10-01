@@ -8,6 +8,9 @@
  * apply results without the component needing to handle dispatch.
  */
 
+import { AiResponseError } from './parse-object-response';
+import { appendThinking } from './thinking-log';
+import type { ThinkingCallback } from './providers/types';
 import { toast } from 'svelte-sonner';
 import type { Edge } from '@xyflow/svelte';
 import type { AiObjectNode, SimplifiedEdge } from '$lib/ai/types';
@@ -43,6 +46,8 @@ export function createAiPromptController(callbacks: AiPromptCallbacks) {
   let promptText = $state('');
   let isLoading = $state(false);
   let errorMessage = $state<string | null>(null);
+  let failedResponse = $state<string | null>(null);
+  let explanation = $state<string | null>(null);
   let resolvedObjectType = $state<string | null>(null);
   let isGeneratingConfig = $state(false);
   let thinkingText = $state<string | null>(null);
@@ -59,12 +64,14 @@ export function createAiPromptController(callbacks: AiPromptCallbacks) {
     resolvedObjectType = null;
     isGeneratingConfig = false;
     errorMessage = null;
+    failedResponse = null;
+    explanation = null;
   }
 
-  function onThinking(thought: string) {
-    thinkingText = thought;
-    thinkingLog = [...thinkingLog, thought];
-  }
+  const onThinking: ThinkingCallback = (thought, event) => {
+    thinkingLog = appendThinking(thinkingLog, thought, event);
+    thinkingText = thinkingLog.at(-1) || null;
+  };
 
   function onProgress(status: string) {
     resolvedObjectType = status;
@@ -153,6 +160,12 @@ export function createAiPromptController(callbacks: AiPromptCallbacks) {
     get errorMessage() {
       return errorMessage;
     },
+    get explanation() {
+      return explanation;
+    },
+    get failedResponse() {
+      return failedResponse;
+    },
     get resolvedObjectType() {
       return resolvedObjectType;
     },
@@ -163,7 +176,7 @@ export function createAiPromptController(callbacks: AiPromptCallbacks) {
       return thinkingText;
     },
     get thinkingLog() {
-      return thinkingLog;
+      return thinkingLog.filter(Boolean);
     },
     get descriptor() {
       return descriptor;
@@ -178,7 +191,10 @@ export function createAiPromptController(callbacks: AiPromptCallbacks) {
       mode = newMode;
       context = newContext ?? {};
       promptText = '';
+
       errorMessage = null;
+      failedResponse = null;
+      explanation = null;
     },
 
     async submit() {
@@ -190,6 +206,7 @@ export function createAiPromptController(callbacks: AiPromptCallbacks) {
 
       isLoading = true;
       resetLoadingState();
+
       const current = new AbortController();
       abortController = current;
 
@@ -204,13 +221,16 @@ export function createAiPromptController(callbacks: AiPromptCallbacks) {
         );
 
         applyResult(result);
+        explanation = result.explanation ?? null;
         return true; // signal success to component (so it can close)
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error occurred';
+
         if (message !== 'Request cancelled') {
           errorMessage = message;
-          toast.error(message);
+          failedResponse = error instanceof AiResponseError ? error.responseText : null;
         }
+
         return false;
       } finally {
         if (abortController === current) {
@@ -227,6 +247,9 @@ export function createAiPromptController(callbacks: AiPromptCallbacks) {
     reset() {
       promptText = '';
       errorMessage = null;
+      failedResponse = null;
+      explanation = null;
+
       resetLoadingState();
     }
   };

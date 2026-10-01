@@ -85,14 +85,14 @@ src/lib/components/
 
 ```typescript
 export type AiPromptMode =
-  | 'single'           // Create one object
-  | 'multi'            // Create multiple connected objects
-  | 'edit'             // Edit existing object data
-  | 'replace'          // Replace object type + data
-  | 'fix-error'        // Fix code error using console output
-  | 'create-consumer'  // Create a consumer for the selected producer node
-  | 'create-producer'  // Create a producer for the selected consumer node
-  | 'decompose';       // Split object into multiple
+  | "single" // Create one object
+  | "multi" // Create multiple connected objects
+  | "edit" // Edit existing object data
+  | "replace" // Replace object type + data
+  | "fix-error" // Fix code error using console output
+  | "create-consumer" // Create a consumer for the selected producer node
+  | "create-producer" // Create a producer for the selected consumer node
+  | "decompose"; // Split object into multiple
 ```
 
 ### Mode selector UX
@@ -110,7 +110,7 @@ export type AiPromptMode =
 export interface AiModeDescriptor {
   id: AiPromptMode;
   label: string;
-  shortLabel: string;           // used in dropdown button + mode list
+  shortLabel: string; // used in dropdown button + mode list
   description: (ctx: AiModeContext) => string;
   placeholder: (ctx: AiModeContext) => string;
   color: AiPromptColor;
@@ -118,9 +118,9 @@ export interface AiModeDescriptor {
   isMulti: boolean;
   requiresNode: boolean;
   promptOptional?: boolean;
-  loadingLabel: string;                              // e.g. "Deciding", "Editing", "Fixing"
+  loadingLabel: string; // e.g. "Deciding", "Editing", "Fixing"
   generatingLabel: (resolvedType: string) => string; // e.g. "Cooking p5", "Replacing with p5"
-  availableInChat?: boolean;    // for spec 95 chat tool integration
+  availableInChat?: boolean; // for spec 95 chat tool integration
   chatToolDescription?: string;
   chatToolSchema?: object;
 }
@@ -135,7 +135,7 @@ type ModeResolver = (
   signal: AbortSignal,
   onThinking: (thought: string) => void,
   onProgress?: (status: string) => void,
-) => Promise<AiModeResult>
+) => Promise<AiModeResult>;
 ```
 
 ### Canvas callbacks
@@ -171,9 +171,32 @@ onReplaceObject?: (nodeId: string, newType: string, newData: Record<string, unkn
 Add AI mode entries to node right-click context menus. When selected, open `AiObjectPrompt` with the correct mode + context pre-set.
 
 Suggested entries:
+
 - All nodes: **AI Edit**, **AI Replace**, **AI Decompose**, **AI Create Consumer**, **AI Create Producer**
 - Error nodes only: **Fix with AI** (or surface via the error badge instead)
 
 ### Step 8 — "Fix with AI" trigger on error badge
 
 Add a button on the node error badge (or virtual console panel) that opens the AI prompt in `fix-error` mode with the node's current console errors pre-loaded into `context.consoleErrors`.
+
+## Streaming reasoning display
+
+Reasoning callbacks deliver text deltas. AI Edit, Preview Edit, and Patch to Prompt concatenate them without adding whitespace, rendering one block per provider generation. Providers announce generation boundaries so routing and configuration generation remain separate blocks. Compact previews show the accumulated current block.
+
+OpenRouter displays readable text and summary reasoning, using only one representation when plaintext and structured fields overlap. Encrypted reasoning stays hidden. Only encrypted-only generations show “Reasoning is encrypted and cannot be displayed.” Emit this notice after the stream finishes so readable reasoning arriving later suppresses it.
+
+## Failed generation recovery
+
+- Keep failures visible inside `AiObjectPrompt`; do not send failure messages only to a toast.
+- Restore the dialog after a failed request with the submitted prompt in the editable textarea. Retrying clears the previous error and response.
+- Preserve the model's original response when parsing or validating its object configuration fails. Show it as plain text in a bounded scroll area, including prose replies and malformed JSON.
+- Recover literal control characters inside JSON strings by escaping them without changing their decoded content. Continue rejecting other malformed JSON; do not guess missing code or fields.
+- Initialize controller state only when the dialog opens. Mode changes and layout updates must not erase a draft or failure.
+- Keep successful application and cancellation behavior unchanged.
+
+### Explanations after JSON
+
+- For responses starting with a JSON object (plain or fenced), find the matching closing brace while respecting nested containers, quoted strings, and escaped quotes. Parse only that JSON segment.
+- Keep trailing text separate from object data and carry it through mode results to the prompt controller. Multi-object results include explanations from both routing and generation.
+- After applying a successful result with an explanation, restore the dialog and show the explanation as Markdown in a bounded scroll area. Keep the prompt editable and offer a Done button to dismiss the result. Success without an explanation continues to close the dialog.
+- Incomplete or malformed JSON still shows the original response as a failure; never search past a malformed leading object for another usable object.
