@@ -30,10 +30,6 @@
   import { Search } from '@lucide/svelte/icons';
   import { formatPresetLocation } from '$lib/presets/preset-utils';
   import { objectPresetSearchIndex } from '../../stores/object-preset-search.store';
-  import {
-    getObjectAutocompleteQuery,
-    shouldSuppressObjectAutocomplete
-  } from '$lib/search/object-autocomplete-query';
   import { useDisabledObjectSuggestion } from '$lib/composables/useDisabledObjectSuggestion.svelte';
   import DisabledObjectSuggestionInline from '$objects/object/DisabledObjectSuggestionInline.svelte';
   import ObjectSuggestionDropdown from '$objects/object/ObjectSuggestionDropdown.svelte';
@@ -48,6 +44,7 @@
   import { useUpdateNodeData } from '$lib/composables/useUpdateNodeData.svelte';
   import type { ObjectNodeData } from './types';
   import { useObjectParameterDrag } from '$objects/object/useObjectParameterDrag.svelte';
+  import { useObjectSuggestions } from './useObjectSuggestions.svelte';
 
   let {
     id: nodeId,
@@ -77,13 +74,12 @@
 
     return data.expr || '';
   };
-  const getInitialExpr = () => getDataExpr();
   const hasInitialExpr = () => !!data.expr;
-  let expr = $state(getInitialExpr());
+  let expr = $state(getDataExpr());
   let isEditing = $state(!hasInitialExpr()); // Start in editing mode if no name;
   let showAutocomplete = $state(false);
   let selectedSuggestion = $state(0);
-  let originalName = getInitialExpr(); // Store original name for escape functionality
+  let originalName = getDataExpr(); // Store original name for escape functionality
   const isQuickAdd = !hasInitialExpr(); // True if created via Quick Add (no initial name)
   let finalNodeId = (() => nodeId)(); // Tracks the final node ID after potential transformation
 
@@ -123,8 +119,8 @@
     () => $isAiFeaturesVisible
   );
 
-  // Get object definition for current name (if it exists)
   const objectMeta = $derived.by(() => {
+    if (isQuickAdd && !data.expr) return null;
     if (!expr || expr.trim() === '') return null;
 
     const objectName = getObjectNameFromExpr(expr);
@@ -185,43 +181,16 @@
     });
   });
 
-  const filteredSuggestions = $derived.by(() => {
-    if (!isEditing) return [];
-    if (isEditingObjectArguments) return [];
-
-    const query = getObjectAutocompleteQuery(expr);
-
-    if (!query) {
-      return $objectPresetSearchIndex.getDefaultObjectSuggestions();
-    }
-
-    return $objectPresetSearchIndex.searchObjectSuggestions(query);
+  const objectSuggestions = useObjectSuggestions({
+    getNodeId: () => nodeId,
+    getExpr: () => expr,
+    getIsEditing: () => isEditing,
+    getSearchIndex: () => $objectPresetSearchIndex,
+    searchDisabledObject
   });
 
-  // Find matching disabled objects when autocomplete has no results
-  // Requires at least 3 characters to avoid noisy suggestions
-  const suggestedDisabledObject = $derived.by(() => {
-    if (!isEditing) return null;
-    if (isEditingObjectArguments) return null;
-
-    const query = getObjectAutocompleteQuery(expr);
-    if (!query) return null;
-
-    // Allow short signal operators like +~, *~, etc. but require 3 chars for general queries
-    if (query.length < 3 && !query.endsWith('~')) return null;
-
-    if (filteredSuggestions.length > 0) return null;
-
-    return searchDisabledObject(query);
-  });
-
-  const isEditingObjectArguments = $derived.by(() => {
-    const objectNames = $objectPresetSearchIndex.allSearchableItems
-      .filter((item) => item.type === 'object')
-      .map((item) => item.name);
-
-    return shouldSuppressObjectAutocomplete(expr, objectNames);
-  });
+  const filteredSuggestions = $derived(objectSuggestions.filteredSuggestions);
+  const suggestedDisabledObject = $derived(objectSuggestions.suggestedDisabledObject);
 
   function enablePackFromSuggestion(packId: string, objectName: string) {
     togglePack(packId);
@@ -295,10 +264,13 @@
     if (save) {
       if (expr.trim()) {
         const objectName = getNameAndParams().name;
+
+        if (isQuickAdd) {
+          expr = objectSuggestions.prepareConfirmation();
+        }
+
         handleNameChange();
 
-        // For Quick Add nodes, emit event so FlowCanvasInner can record to history
-        // We use setTimeout to ensure the node transformation (if any) is complete
         if (isQuickAdd) {
           setTimeout(() => {
             eventBus.dispatch({ type: 'quickAddConfirmed', finalNodeId, objectName });
@@ -508,6 +480,12 @@
     if (isDismissKey(event)) {
       event.preventDefault();
       exitEditingMode(false);
+      return;
+    }
+
+    if (event.key === 'Enter' && objectSuggestions.shouldConfirmExplicitExpression()) {
+      event.preventDefault();
+      exitEditingMode(true);
       return;
     }
 

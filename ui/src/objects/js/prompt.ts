@@ -13,6 +13,8 @@ JavaScript execution block for general-purpose logic and utilities.
 ${esmInstructions}
 ${runOnMountInstructions}
 
+- setPrimaryButton('run' | 'code' | 'settings'): choose the main action - run the script (default), edit code, or adjust defined settings.
+
 ${fftInstructions}
 
 ${patcherLibraryInstructions}

@@ -47,12 +47,37 @@ function getDynamicVideoHandles(
   );
 }
 
+function getDynamicMessageHandles(
+  node: Node,
+  port: 'inlet' | 'outlet',
+  template?: string
+): string[] {
+  const direction = port === 'inlet' ? 'in' : 'out';
+  if (template !== `${direction}-{index}`) return [];
+
+  const data = node.data as Record<string, unknown>;
+  const count = data[`${port}Count`] ?? 1;
+  const offset = data[port === 'inlet' ? 'videoInletCount' : 'videoOutletCount'] ?? 0;
+
+  if (typeof count !== 'number' || count <= 0 || typeof offset !== 'number') {
+    return [];
+  }
+
+  return Array.from({ length: Math.floor(count) }, (_, index) =>
+    template.replace('{index}', (index + offset).toString())
+  );
+}
+
 function getInletCandidates(
   node: Node,
   schemaInlets: InletSchema[],
-  dynamicVideoInletTemplate?: string
+  dynamicVideoInletTemplate?: string,
+  dynamicMessageInletTemplate?: string
 ): InletCandidate[] {
   const staticInlets = getStaticInletCandidates(schemaInlets);
+  const messageInlets = getDynamicMessageHandles(node, 'inlet', dynamicMessageInletTemplate).map(
+    (handle) => ({ handle })
+  );
   const uniformDefs = (node.data as { glUniformDefs?: unknown } | undefined)?.glUniformDefs;
 
   const patternInlets = getDynamicVideoHandles(
@@ -61,7 +86,7 @@ function getInletCandidates(
     'videoInletCount'
   ).map((handle) => ({ handle }));
 
-  if (!Array.isArray(uniformDefs)) return [...staticInlets, ...patternInlets];
+  if (!Array.isArray(uniformDefs)) return [...staticInlets, ...messageInlets, ...patternInlets];
 
   const dynamicInlets = uniformDefs.flatMap((uniform, index) => {
     const withoutInlets =
@@ -88,7 +113,7 @@ function getInletCandidates(
     ];
   });
 
-  return [...staticInlets, ...patternInlets, ...dynamicInlets];
+  return [...staticInlets, ...messageInlets, ...patternInlets, ...dynamicInlets];
 }
 
 export interface EdgeInsertionPlan {
@@ -101,6 +126,53 @@ export interface EdgeInsertionPlan {
 /** Preview edges only exist while a Quick Insert object is awaiting confirmation. */
 export const isEdgeInsertionPreview = (edge: Edge): boolean =>
   (edge.data as { edgeInsertionPreview?: unknown } | undefined)?.edgeInsertionPreview === true;
+
+/** Returns the live edge behind a node's temporary insertion preview. */
+export function getQuickInsertEdge(edges: Edge[], nodeId: string): Edge | undefined {
+  const preview = edges.find((edge) => edge.target === nodeId && isEdgeInsertionPreview(edge));
+  const originalEdgeId = preview?.data?.edgeInsertionOriginalEdgeId;
+
+  return edges.find((edge) => edge.id === originalEdgeId);
+}
+
+/** Retires generic handles before the placeholder transforms into its selected object. */
+export function retireEdgeInsertionPreview(edges: Edge[], nodeId: string): Edge[] {
+  const original = getQuickInsertEdge(edges, nodeId);
+  if (!original) return edges;
+
+  return edges.map((edge) => {
+    if (!isEdgeInsertionPreview(edge) || (edge.source !== nodeId && edge.target !== nodeId)) {
+      return edge;
+    }
+
+    // XYFlow still lays out hidden edges, so their endpoints must remain valid.
+    return {
+      ...edge,
+      source: original.source,
+      sourceHandle: original.sourceHandle,
+      target: original.target,
+      targetHandle: original.targetHandle,
+      hidden: true
+    };
+  });
+}
+
+/** Keeps the original route active while displaying the editor-only splice. */
+export const showEdgeInsertionPreview = (edges: Edge[], edge: Edge, previews: Edge[]): Edge[] => [
+  ...edges.map((candidate) =>
+    candidate.id === edge.id ? { ...candidate, hidden: true } : candidate
+  ),
+  ...previews
+];
+
+export const restoreEdgeInsertionPreview = (
+  edges: Edge[],
+  edge: Edge,
+  previewIds: string[]
+): Edge[] => [
+  ...edges.filter((candidate) => candidate.id !== edge.id && !previewIds.includes(candidate.id)),
+  edge
+];
 
 /**
  * Creates the temporary pair of edges shown while a Quick Insert object is
@@ -120,7 +192,7 @@ export function createEdgeInsertionPreview(
       target: insertedNodeId,
       targetHandle: 'message-in',
       zIndex: 0,
-      data: { edgeInsertionPreview: true }
+      data: { edgeInsertionPreview: true, edgeInsertionOriginalEdgeId: edge.id }
     },
     {
       id: edgeIds[1],
@@ -129,7 +201,7 @@ export function createEdgeInsertionPreview(
       target: edge.target,
       targetHandle: edge.targetHandle,
       zIndex: 0,
-      data: { edgeInsertionPreview: true }
+      data: { edgeInsertionPreview: true, edgeInsertionOriginalEdgeId: edge.id }
     }
   ];
 }
@@ -159,7 +231,8 @@ export function planEdgeInsertion(
     schema.inlets,
     schema.handlePatterns?.inlet?.handleType === 'video'
       ? schema.handlePatterns.inlet.template
-      : undefined
+      : undefined,
+    schema.handlePatterns?.inlet?.template
   ).find((candidate) => {
     return isValidConnectionBetweenHandles(edge.sourceHandle, candidate.handle, {
       isTargetAudioParam:
@@ -180,6 +253,7 @@ export function planEdgeInsertion(
         })
       ];
     }),
+    ...getDynamicMessageHandles(insertedNode, 'outlet', schema.handlePatterns?.outlet?.template),
     ...getDynamicVideoHandles(
       insertedNode,
       schema.handlePatterns?.outlet?.handleType === 'video'

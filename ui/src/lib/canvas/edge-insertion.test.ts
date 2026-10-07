@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { Edge, Node } from '@xyflow/svelte';
 import type { ObjectSchemaRegistry } from '$lib/objects/schemas';
+import { jsSchema } from '$objects/js/schema';
 import { glslSchema } from '$objects/glsl/schema';
 import { preset as glslPipePreset } from '$presets/glsl/passthru';
 import { PRESETS } from '$lib/presets/presets';
@@ -18,7 +19,11 @@ import {
   getCenteredNodeInsertionPosition,
   getEdgeInsertionPosition,
   isEdgeInsertionPreview,
-  planEdgeInsertion
+  planEdgeInsertion,
+  showEdgeInsertionPreview,
+  restoreEdgeInsertionPreview,
+  getQuickInsertEdge,
+  retireEdgeInsertionPreview
 } from './edge-insertion';
 
 const schema = {
@@ -238,6 +243,53 @@ describe('getEdgeInsertionPosition', () => {
 });
 
 describe('createEdgeInsertionPreview', () => {
+  test('retires placeholder handles before confirmation without exposing previews to routing', () => {
+    const audioEdge: Edge = {
+      ...edge,
+      sourceHandle: 'audio-out-0',
+      targetHandle: 'audio-in-0'
+    };
+
+    const unrelated: Edge = {
+      ...audioEdge,
+      id: 'unrelated'
+    };
+
+    const previews = createEdgeInsertionPreview(audioEdge, 'quick-add', [
+      'preview-left',
+      'preview-right'
+    ]);
+
+    const editingEdges = showEdgeInsertionPreview([audioEdge, unrelated], audioEdge, previews);
+    const retiringEdges = retireEdgeInsertionPreview(editingEdges, 'quick-add');
+
+    expect(retiringEdges.filter(isEdgeInsertionPreview)).toEqual(
+      previews.map((preview) => ({
+        ...preview,
+        source: audioEdge.source,
+        sourceHandle: audioEdge.sourceHandle,
+        target: audioEdge.target,
+        targetHandle: audioEdge.targetHandle,
+        hidden: true
+      }))
+    );
+
+    expect(retiringEdges.filter((candidate) => !isEdgeInsertionPreview(candidate))).toEqual([
+      { ...audioEdge, hidden: true },
+      unrelated
+    ]);
+
+    expect(
+      restoreEdgeInsertionPreview(
+        retiringEdges,
+        audioEdge,
+        previews.map((preview) => preview.id)
+      )
+    ).toEqual([unrelated, audioEdge]);
+
+    expect(retireEdgeInsertionPreview(retiringEdges, 'quick-add')).toBe(retiringEdges);
+  });
+
   test('temporarily routes both ends of the selected edge through generic object handles', () => {
     expect(
       createEdgeInsertionPreview(edge, 'quick-add', ['preview-left', 'preview-right'])
@@ -249,7 +301,7 @@ describe('createEdgeInsertionPreview', () => {
         target: 'quick-add',
         targetHandle: 'message-in',
         zIndex: 0,
-        data: { edgeInsertionPreview: true }
+        data: { edgeInsertionPreview: true, edgeInsertionOriginalEdgeId: edge.id }
       },
       {
         id: 'preview-right',
@@ -258,7 +310,7 @@ describe('createEdgeInsertionPreview', () => {
         target: 'right',
         targetHandle: 'message-in',
         zIndex: 0,
-        data: { edgeInsertionPreview: true }
+        data: { edgeInsertionPreview: true, edgeInsertionOriginalEdgeId: edge.id }
       }
     ]);
   });
@@ -267,6 +319,60 @@ describe('createEdgeInsertionPreview', () => {
     expect(
       isEdgeInsertionPreview(createEdgeInsertionPreview(edge, 'quick-add', ['left', 'right'])[0]!)
     ).toBe(true);
+
     expect(isEdgeInsertionPreview(edge)).toBe(false);
+  });
+
+  test('keeps the live route during editing and restores it on cancellation', () => {
+    const unrelated: Edge = { ...edge, id: 'unrelated' };
+
+    const previews = createEdgeInsertionPreview(edge, 'quick-add', [
+      'preview-left',
+      'preview-right'
+    ]);
+
+    const editingEdges = showEdgeInsertionPreview([edge, unrelated], edge, previews);
+    expect(getQuickInsertEdge(editingEdges, 'quick-add')).toEqual({ ...edge, hidden: true });
+
+    expect(editingEdges.filter((candidate) => !isEdgeInsertionPreview(candidate))).toEqual([
+      { ...edge, hidden: true },
+      unrelated
+    ]);
+
+    expect(
+      restoreEdgeInsertionPreview(
+        editingEdges,
+        edge,
+        previews.map((preview) => preview.id)
+      )
+    ).toEqual([unrelated, edge]);
+  });
+
+  test.each(['js', 'js>'])('wires %s through the JS pipe preset message handles', (name) => {
+    const preset = PRESETS['js>']!;
+
+    const node = applyEdgeInsertionPipePreset(
+      {
+        ...inserted,
+        type: preset.type,
+        data: name === 'js' ? {} : (preset.data as Record<string, unknown>)
+      },
+      name
+    );
+
+    expect(planEdgeInsertion(edge, node, target, { js: jsSchema }, (node) => node.type)).toEqual({
+      sourceHandle: 'message-out',
+      insertedInletHandle: 'in-0',
+      insertedOutletHandle: 'out-0',
+      targetHandle: 'message-in'
+    });
+
+    expect(node.data).toEqual(preset.data);
+  });
+
+  test.each(['inletCount', 'outletCount'])('does not wire JS with zero %s', (countKey) => {
+    const node = { ...inserted, type: 'js', data: { [countKey]: 0 } };
+
+    expect(planEdgeInsertion(edge, node, target, { js: jsSchema }, (node) => node.type)).toBeNull();
   });
 });
