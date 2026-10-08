@@ -12,6 +12,7 @@ const PATCHIES_API_COMPLETIONS: Completion[] = [
   // Message API
   {
     label: 'send',
+    boost: 99,
     type: 'function',
     detail: '(message, options?) => void',
     info: 'Send a message to connected nodes. Options: {to: outletIndex}',
@@ -19,6 +20,7 @@ const PATCHIES_API_COMPLETIONS: Completion[] = [
   },
   {
     label: 'recv',
+    boost: 99,
     type: 'function',
     detail: '(callback) => void',
     info: 'Register a callback to receive messages from inlets. Callback receives (data, meta)',
@@ -30,6 +32,14 @@ const PATCHIES_API_COMPLETIONS: Completion[] = [
     detail: '(callback) => void',
     info: 'Alias for recv(). Register a callback to receive messages from inlets',
     apply: 'onMessage((data, meta) => {\n  \n})'
+  },
+
+  {
+    label: 'llm',
+    type: 'function',
+    detail: '(text | conversation, options?) => Promise<string>',
+    info: 'Generate a reply from text or user/assistant turns; options.onChunk(delta, text) streams a draft.',
+    apply: 'llm()'
   },
 
   // Port Configuration
@@ -290,10 +300,17 @@ const PATCHIES_API_COMPLETIONS: Completion[] = [
     apply: 'noWheel()'
   },
   {
+    label: 'noArrowKeyMove',
+    type: 'function',
+    detail: '() => void',
+    info: 'Disable moving this node with arrow keys, including Shift + arrow keys',
+    apply: 'noArrowKeyMove()'
+  },
+  {
     label: 'noInteract',
     type: 'function',
     detail: '() => void',
-    info: 'Disable all canvas interactions (drag, pan, wheel) - convenience for noDrag + noPan + noWheel',
+    info: 'Disable dragging, panning, wheel zoom, and arrow-key node movement',
     apply: 'noInteract()'
   },
   {
@@ -447,6 +464,7 @@ const PATCHIES_API_COMPLETIONS: Completion[] = [
   // Console
   {
     label: 'console.log',
+    boost: 99,
     type: 'function',
     detail: '(...data) => void',
     info: 'Log messages to the virtual console (not browser console)',
@@ -547,6 +565,7 @@ const P5_FLUID_SIZE_COMPLETION: Completion = {
 // Setup functions that should only appear at top-level (not in function bodies)
 const TOP_LEVEL_ONLY_FUNCTIONS = new Set([
   'noDrag',
+  'noArrowKeyMove',
   'showAudioInput',
   'noInteract',
   'setVideoOutput',
@@ -588,7 +607,12 @@ const TOP_LEVEL_ONLY_FUNCTIONS = new Set([
   'setVideoCount'
 ]);
 
-const P5_FUNCTION_BODY_SURFACE_FUNCTIONS = new Set([
+const P5_FUNCTION_BODY_SETUP_FUNCTIONS = new Set([
+  'noDrag',
+  'noPan',
+  'noWheel',
+  'noArrowKeyMove',
+  'noInteract',
   'hideExitButton',
   'setMouseForwarding',
   'setFluidSize'
@@ -598,11 +622,15 @@ function isAllowedInFunctionBody(completion: Completion, patchiesContext?: Patch
   if (!TOP_LEVEL_ONLY_FUNCTIONS.has(completion.label)) return true;
 
   return (
-    patchiesContext?.nodeType === 'p5' && P5_FUNCTION_BODY_SURFACE_FUNCTIONS.has(completion.label)
+    patchiesContext?.nodeType === 'p5' && P5_FUNCTION_BODY_SETUP_FUNCTIONS.has(completion.label)
   );
 }
 
-const MOUSE_INTERACTION_JS_NODES = [
+const INTERACTION_JS_NODES = [
+  'hydra',
+  'swgl',
+  'pixi',
+  'regl',
   'p5',
   'canvas',
   'canvas.dom',
@@ -618,7 +646,16 @@ const MOUSE_INTERACTION_JS_NODES = [
 
 const KV_JS_NODES = ['js', 'worker', 'p5', 'canvas.dom', 'pixi.dom'];
 
-const KEYBOARD_JS_NODES = ['canvas.dom', 'textmode.dom', 'three.dom', 'pixi.dom', 'surface'];
+const KEYBOARD_JS_NODES = [
+  'canvas.dom',
+  'textmode.dom',
+  'three.dom',
+  'pixi.dom',
+  'surface',
+  'dom',
+  'vue'
+];
+
 const SURFACE_JS_NODES = ['surface'];
 const P5_SURFACE_JS_NODES = ['surface', 'p5'];
 const DOM_RUNTIME_JS_NODES = ['dom', 'vue'];
@@ -654,6 +691,27 @@ const NODE_SPECIFIC_FUNCTIONS: Record<string, string[]> = {
     'elem~',
     'sonic~'
   ],
+  llm: [
+    'js',
+    'worker',
+    'p5',
+    'hydra',
+    'canvas',
+    'canvas.dom',
+    'swgl',
+    'regl',
+    'textmode',
+    'textmode.dom',
+    'three',
+    'three.dom',
+    'pixi.dom',
+    'tone~',
+    'dom',
+    'vue',
+    'surface',
+    'elem~',
+    'sonic~'
+  ],
   fft: [
     'js',
     'worker',
@@ -672,10 +730,11 @@ const NODE_SPECIFIC_FUNCTIONS: Record<string, string[]> = {
   ],
   opencv: ['js', 'worker', 'canvas', 'canvas.dom'],
   loadExtensions: ['pixi', 'pixi.dom'],
-  noDrag: MOUSE_INTERACTION_JS_NODES,
-  noPan: MOUSE_INTERACTION_JS_NODES,
-  noWheel: MOUSE_INTERACTION_JS_NODES,
-  noInteract: MOUSE_INTERACTION_JS_NODES,
+  noDrag: INTERACTION_JS_NODES,
+  noArrowKeyMove: INTERACTION_JS_NODES,
+  noPan: INTERACTION_JS_NODES,
+  noWheel: INTERACTION_JS_NODES,
+  noInteract: INTERACTION_JS_NODES,
   createSurfaceCanvas: ['p5'],
   setMouseForwarding: ['surface', 'p5'],
   setVideoOutput: [
@@ -815,8 +874,13 @@ const NODE_SPECIFIC_FUNCTIONS: Record<string, string[]> = {
     'three.dom',
     'pixi',
     'pixi.dom',
+    'regl',
+    'swgl',
     'dom',
-    'vue'
+    'vue',
+    'tone~',
+    'sonic~',
+    'elem~'
   ],
   clock: [
     'js',
@@ -841,6 +905,15 @@ const NODE_SPECIFIC_FUNCTIONS: Record<string, string[]> = {
  * Member completions for Patchies APIs (shown after `obj.` or `fft().`)
  */
 const memberCompletions: Record<string, Completion[]> = {
+  llm: [
+    {
+      label: 'turn',
+      type: 'function',
+      detail: '(text | conversation, options?) => Promise<AssistantTurn>',
+      info: 'Return an assistant turn with opaque reasoning and tool history. Append it unchanged and reuse the same provider and model.',
+      apply: 'turn()'
+    }
+  ],
   fft: [
     {
       label: 'a',

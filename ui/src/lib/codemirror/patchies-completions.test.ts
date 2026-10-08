@@ -79,6 +79,15 @@ function getHydraCompletion(doc: string, label: string) {
 }
 
 describe('patchies completions', () => {
+  it.each(['regl', 'swgl', 'tone~', 'sonic~', 'elem~'])(
+    'shows settings and its methods for %s',
+    (nodeType) => {
+      expect(getCompletionLabels(nodeType, 'sett')).toContain('settings');
+      expect(getCompletionLabels(nodeType, 'settings.')).toContain('define');
+      expect(getCompletionLabels(nodeType, 'settings.')).toContain('onChange');
+    }
+  );
+
   it('does not show Patchies API completions inside strings or template strings', () => {
     expect(getCompletionLabels('hydra', "'se")).toEqual([]);
     expect(getCompletionLabels('hydra', '"se')).toEqual([]);
@@ -206,7 +215,7 @@ describe('patchies completions', () => {
     expect(labels).not.toContain('deactivate');
   });
 
-  it.each(['canvas.dom', 'textmode.dom', 'three.dom', 'pixi.dom', 'surface'])(
+  it.each(['canvas.dom', 'textmode.dom', 'three.dom', 'pixi.dom', 'surface', 'dom', 'vue'])(
     'shows keyboard callback completions for %s',
     (nodeType) => {
       expect(getCompletionLabels(nodeType, 'onKeyD')).toContain('onKeyDown');
@@ -229,6 +238,12 @@ describe('patchies completions', () => {
 
     expect(labels).not.toContain('activate');
     expect(labels).not.toContain('deactivate');
+  });
+
+  it('shows interaction completions inside p5 setup', () => {
+    expect(getCompletionLabels('p5', 'function setup() { noArrow')).toContain('noArrowKeyMove');
+    expect(getCompletionLabels('p5', 'function setup() { noI')).toContain('noInteract');
+    expect(getCompletionLabels('p5', 'function setup() { noD')).toContain('noDrag');
   });
 
   it('shows p5 surface mode helper completions inside setup', () => {
@@ -307,6 +322,31 @@ describe('patchies completions', () => {
   it('shows setTitle completions for Pixi nodes', () => {
     expect(getCompletionLabels('pixi', 'setT')).toContain('setTitle');
     expect(getCompletionLabels('pixi.dom', 'setT')).toContain('setTitle');
+  });
+
+  it.each([
+    'hydra',
+    'swgl',
+    'pixi',
+    'p5',
+    'canvas',
+    'canvas.dom',
+    'textmode',
+    'textmode.dom',
+    'three',
+    'three.dom',
+    'pixi.dom',
+    'regl',
+    'vue',
+    'dom',
+    'surface'
+  ])('shows arrow-key movement completion for %s', (nodeType) => {
+    expect(getCompletionLabels(nodeType, 'noArrow')).toContain('noArrowKeyMove');
+  });
+
+  it('omits arrow-key movement completion in unsupported runtimes', () => {
+    expect(getCompletionLabels('js', 'noArrow')).not.toContain('noArrowKeyMove');
+    expect(getCompletionLabels('glsl', 'noArrow')).not.toContain('noArrowKeyMove');
   });
 
   it('shows canvas interaction completions for pixi.dom nodes', () => {
@@ -504,3 +544,11 @@ describe('patchies completions', () => {
     expect(getShaderParkCompletionLabels('shaderpark', 'setSpace(l')).toContain('log2');
   });
 });
+
+it.each(['js', 'worker', 'p5', 'canvas', 'dom', 'surface'])(
+  'offers llm and llm.turn in %s nodes',
+  (nodeType) => {
+    expect(getCompletionLabels(nodeType, 'await llm')).toContain('llm');
+    expect(getCompletionLabels(nodeType, 'await llm.')).toContain('turn');
+  }
+);

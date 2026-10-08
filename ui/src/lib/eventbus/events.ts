@@ -128,7 +128,7 @@ export interface NodeHidePortsUpdateEvent {
   hidePorts: boolean;
 }
 
-export type NodeInteractionMode = 'drag' | 'pan' | 'wheel' | 'interact';
+export type NodeInteractionMode = 'drag' | 'pan' | 'wheel' | 'arrowKeyMove' | 'interact';
 
 export interface NodeInteractionUpdateEvent {
   type: 'nodeInteractionUpdate';
@@ -281,7 +281,8 @@ export interface WorkerSendMessageEvent {
 export interface WorkerCallbackRegisteredEvent {
   type: 'workerCallbackRegistered';
   nodeId: string;
-  callbackType: 'message' | 'interval' | 'timeout';
+  callbackType: 'message' | 'interval' | 'timeout' | 'async';
+  active?: boolean;
 }
 
 export interface WorkerFlashEvent {

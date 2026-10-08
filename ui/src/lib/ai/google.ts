@@ -1,22 +1,28 @@
+import {
+  getGeminiImageConfig,
+  getOpenRouterImageOptions,
+  type ImageGenerationOptions
+} from './image-generation-options';
+import { streamLLMResponse } from './llm-js/llm-stream';
+import { prepareLLMTools } from './llm-js/llm-tools';
+import { generateLLMTurn } from './llm-js/llm-tool-loop';
 import { GLSystem } from '$lib/canvas/GLSystem';
 import type { GLPreviewFrameCapturedEvent } from '$lib/eventbus/events';
 import { DEFAULT_GEMINI_IMAGE_MODEL } from '../../stores/ai-settings.store';
-import type { AIProviderType } from './providers';
 
-type LLMFunctionContext = {
-  imageNodeId?: string;
-  abortSignal?: AbortSignal;
-  model?: string;
-  temperature?: number;
-  topK?: number;
-  provider?: AIProviderType;
-};
+import {
+  normalizeLLMInput,
+  type LLMInput,
+  type LLMOptions,
+  type LLMConversationTurn
+} from './llm-js/llm-input';
 
 type ImageGenerationContext = {
   apiKey: string;
   model?: string;
   abortSignal?: AbortSignal;
   inputImageNodeId?: string;
+  options?: ImageGenerationOptions;
 };
 
 export async function generateImageWithGemini(
@@ -25,7 +31,8 @@ export async function generateImageWithGemini(
     apiKey,
     model = DEFAULT_GEMINI_IMAGE_MODEL,
     abortSignal,
-    inputImageNodeId
+    inputImageNodeId,
+    options
   }: ImageGenerationContext
 ): Promise<ImageBitmap> {
   const { GoogleGenAI } = await import('@google/genai');
@@ -65,7 +72,7 @@ export async function generateImageWithGemini(
   const response = await ai.models.generateContent({
     model,
     contents,
-    config: { abortSignal }
+    config: { ...getGeminiImageConfig(options, model), abortSignal }
   });
 
   // Check all candidates for an image
@@ -112,14 +119,16 @@ export async function generateImageWithOpenRouter(
   {
     apiKey,
     model,
-    abortSignal
+    abortSignal,
+    options
   }: {
     apiKey: string;
     model: string;
     abortSignal?: AbortSignal;
+    options?: ImageGenerationOptions;
   }
 ): Promise<ImageBitmap> {
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+  const response = await fetch('https://openrouter.ai/api/v1/images', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -129,8 +138,8 @@ export async function generateImageWithOpenRouter(
     },
     body: JSON.stringify({
       model,
-      messages: [{ role: 'user', content: prompt }],
-      modalities: ['image']
+      prompt,
+      ...getOpenRouterImageOptions(options)
     }),
     signal: abortSignal
   });
@@ -143,36 +152,28 @@ export async function generateImageWithOpenRouter(
 
   const data = await response.json();
 
-  const images: { image_url?: { url?: string } }[] = data.choices?.[0]?.message?.images ?? [];
+  const images: { b64_json?: string; media_type?: string }[] = data.data ?? [];
 
   for (const img of images) {
-    const url = img.image_url?.url;
-    if (!url) continue;
+    if (!img.b64_json) continue;
 
-    const mimeMatch = url.match(/^data:([^;]+);base64,/);
-    const mime = mimeMatch?.[1] ?? 'image/png';
-    const base64 = url.replace(/^data:[^;]+;base64,/, '');
-    const blob = base64ToBlob(base64, mime);
+    const blob = base64ToBlob(img.b64_json, img.media_type ?? 'image/png');
 
     return createImageBitmap(blob);
   }
 
-  // Some models embed the image in content parts instead
-  const content = data.choices?.[0]?.message?.content;
-
-  if (typeof content === 'string' && content) {
-    throw new Error(
-      `Model did not generate an image. Try an image-capable model. Response: ${content}`
-    );
-  }
-
-  throw new Error(
-    'No image returned. Make sure your OpenRouter model supports image generation (e.g. google/gemini-3.8-flash).'
-  );
+  throw new Error(`OpenRouter returned no image for model "${model}".`);
 }
 
 export function createLLMFunction() {
-  return async (prompt: string, context?: LLMFunctionContext) => {
+  const execute = async (input: LLMInput, context?: LLMOptions, returnTurn = false) => {
+    const messages = normalizeLLMInput(input);
+    const preparedTools = prepareLLMTools(context?.tools);
+
+    if (context?.abortSignal?.aborted) {
+      throw new Error('Request cancelled');
+    }
+
     const { getTextProvider } = await import('./providers');
     const provider = getTextProvider(context?.model, context?.provider);
 
@@ -191,12 +192,40 @@ export function createLLMFunction() {
       }
     }
 
-    return provider.generateText([{ role: 'user', content: prompt, images }], {
+    if (images.length) {
+      messages[messages.length - 1].images = images;
+    }
+
+    if (context?.abortSignal?.aborted) {
+      throw new Error('Request cancelled');
+    }
+
+    const options = {
       signal: context?.abortSignal,
       temperature: context?.temperature,
-      topK: context?.topK
-    });
+      topK: context?.topK,
+      systemPrompt: context?.systemPrompt
+    };
+
+    if (returnTurn || context?.tools || messages.some((message) => message._raw !== undefined)) {
+      const turn = await generateLLMTurn({ provider, messages, options: context, preparedTools });
+
+      return returnTurn ? turn : turn.content;
+    }
+
+    return streamLLMResponse(
+      (onToken) => provider.generateText(messages, { ...options, ...(onToken ? { onToken } : {}) }),
+      context ?? {}
+    );
   };
+
+  const llm = async (input: LLMInput, options?: LLMOptions): Promise<string> =>
+    (await execute(input, options)) as string;
+
+  llm.turn = async (input: LLMInput, options?: LLMOptions): Promise<LLMConversationTurn> =>
+    (await execute(input, options, true)) as LLMConversationTurn;
+
+  return llm;
 }
 
 export function bitmapToBase64Image({
@@ -237,6 +266,7 @@ export async function compressImageFile(
 
   const mimeType = 'image/jpeg';
   const data = canvas.toDataURL(mimeType, quality).replace(`data:${mimeType};base64,`, '');
+
   return { mimeType, data };
 }
 

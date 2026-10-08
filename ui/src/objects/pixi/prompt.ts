@@ -2,6 +2,8 @@ export const pixiPrompt = `## pixi Object Instructions
 
 Pixi.js 8 runs in the web-worker render pipeline. Use it for 2D graphics that chain efficiently into other video objects.
 
+- noDrag(), noPan(), noWheel(), noArrowKeyMove(), noInteract() control editor interactions. noArrowKeyMove() disables arrow-key node movement; noInteract() includes it.
+
 **Globals:**
 - PIXI: Pixi.js namespace
 - stage: root Container; add display objects here
@@ -10,6 +12,7 @@ Pixi.js 8 runs in the web-worker render pipeline. Use it for 2D graphics that ch
 - loadExtensions(...names): await before using optional Pixi APIs, for example await loadExtensions('filters'). Use loadExtensions('all') for every worker-safe extension.
 
 **Rules:**
+- Almost always call setTitle() with a very short name describing the object, for example setTitle('Particles'). Prefer one or two words rather than a sentence.
 - Graphics is available by default.
 - Draw a shape before calling fill() or stroke(). For paths, chain moveTo()/lineTo()/arcTo() directly on Graphics; never call Graphics.path() without a GraphicsPath argument.
 - Define draw(time) for animation. Do not use requestAnimationFrame.
@@ -42,7 +45,8 @@ Pixi.js 8 on the main thread. Use it for interactive 2D graphics with native poi
 - setHidePorts(true | false): hide or show the video output handle.
 - setTags(tags): replace user-defined tags for this node.
 - kv: persistent key-value storage scoped to this node.
-- noDrag(), noPan(), noWheel(), noInteract(): disable node drag, canvas pan, wheel zoom, or all three when Pixi pointer interaction needs them.
+- noDrag(), noPan(), noWheel(), noArrowKeyMove(), noInteract(): disable node drag, canvas pan, wheel zoom, arrow-key node movement, or all four when Pixi interaction needs them.
+- noArrowKeyMove() disables moving the node with arrow keys, including Shift + arrow keys. noInteract() includes this control.
 - noBorder(): hide Patchies' preview border and selected glow until the call is removed and the node runs again.
 - onSelectionChange(callback): Calls callback(selected) immediately with current canvas selection, then only when it changes. Returns an unsubscribe function; subscriptions clear on rerun or destruction. Selection is separate from keyboard focus.
 - onKeyDown(event => {}) / onKeyUp(event => {}): receive keyboard events while the Pixi canvas is focused. Events do not leak to the Patchies editor.
@@ -50,6 +54,8 @@ Pixi.js 8 on the main thread. Use it for interactive 2D graphics with native poi
 When using noBorder() for a custom widget, use onSelectionChange() to keep a visible selection indicator that matches its theme and geometry, including rounded or inset borders. Store selected in a variable and use it in draw() or redraw the scene from the callback, including for paused or static widgets. Register after any drawing resources used by the callback exist, because the initial callback runs immediately.
 
 **Rules:**
+- Almost always call setTitle() with a very short name describing the object, for example setTitle('Calculator'). Prefer one or two words rather than a sentence.
+- If the object is resizable by default and its background is neither transparent nor black, you must call noBorder(). All three conditions must hold; a colored shape on a transparent background alone does not require it.
 - Graphics is available by default.
 - Draw a shape before calling fill() or stroke(). For paths, chain moveTo()/lineTo()/arcTo() directly on Graphics; never call Graphics.path() without a GraphicsPath argument.
 - Define draw(time) for animation. Do not use requestAnimationFrame.

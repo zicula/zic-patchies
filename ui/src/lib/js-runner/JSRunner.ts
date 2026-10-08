@@ -1,3 +1,4 @@
+import { snapshotLLMInput } from '$lib/ai/llm-js/llm-input';
 import { getImportedModuleNames, getModuleNameByNode, isSnippetModule } from './js-module-utils';
 import { opencv } from './opencv';
 import { MessageContext } from '$lib/messages/MessageContext';
@@ -143,6 +144,7 @@ export class JSRunner {
   public moduleResolver = new JSModuleResolver(this.modules);
 
   private messageContextMap: Map<string, MessageContext> = new Map();
+  private executionControllers = new Map<string, AbortController>();
   private lookaheadClockSchedulerMap: Map<string, LookaheadClockScheduler> = new Map();
 
   private sendToRenderWorker?: (moduleName: string, code: string | null) => void;
@@ -335,6 +337,9 @@ export class JSRunner {
   }
 
   destroy(nodeId: string): void {
+    this.executionControllers.get(nodeId)?.abort();
+    this.executionControllers.delete(nodeId);
+
     // Destroy context before removing from map (runs cleanup callbacks)
     const context = this.messageContextMap.get(nodeId);
     if (context) {
@@ -394,6 +399,13 @@ export class JSRunner {
     const messageSystemContext = skipMessageContext
       ? NOOP_MESSAGE_CONTEXT
       : this.setupMessageContext(nodeId, messageContext);
+
+    this.executionControllers.get(nodeId)?.abort();
+
+    const executionController = new AbortController();
+    this.executionControllers.set(nodeId, executionController);
+
+    messageSystemContext.onCleanup(() => executionController.abort());
 
     // Clear stale logs from last run, so only errors from the current run are visible
     if (!skipMessageContext) {
@@ -521,14 +533,35 @@ export class JSRunner {
 
     let llmFn: LLMFunction | undefined;
 
-    async function llm(...args: Parameters<LLMFunction>) {
-      if (!llmFn) {
-        const { createLLMFunction } = await import('$lib/ai/google');
-        llmFn = createLLMFunction();
-      }
+    const trackAsync = <T>(operation: () => Promise<T>): Promise<T> =>
+      skipMessageContext
+        ? operation()
+        : (messageContext ?? this.getMessageContext(nodeId)).trackAsync(operation);
 
-      return llmFn(...args);
-    }
+    const createTrackedLLM =
+      <T>(select: (fn: LLMFunction) => (...args: Parameters<LLMFunction>) => Promise<T>) =>
+      (...args: Parameters<LLMFunction>) =>
+        trackAsync(async () => {
+          const [_input, options] = args;
+          const input = snapshotLLMInput(_input);
+
+          if (!llmFn) {
+            const { createLLMFunction } = await import('$lib/ai/google');
+            llmFn = createLLMFunction();
+          }
+
+          // allow the runner to abort the LLM request when the node is re-ran or destroyed
+          const abortSignal = options?.abortSignal
+            ? AbortSignal.any([executionController.signal, options.abortSignal])
+            : executionController.signal;
+
+          return select(llmFn)(input, { ...options, abortSignal });
+        });
+
+    const llm: LLMFunction = Object.assign(
+      createTrackedLLM((fn) => fn),
+      { turn: createTrackedLLM((fn) => fn.turn) }
+    );
 
     const functionArgs = [
       customConsole,
