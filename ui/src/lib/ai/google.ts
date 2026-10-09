@@ -42,28 +42,9 @@ export async function generateImageWithGemini(
 
   // Add input image if provided (for image-to-image generation)
   if (inputImageNodeId) {
-    const glSystem = GLSystem.getInstance();
-    const [outWidth, outHeight] = glSystem.outputSize;
+    const image = await captureImageGenerationInput(inputImageNodeId, abortSignal);
 
-    // for image-to-image, we use half resolution of the output size.
-    const customSize = [outWidth, outHeight] as [number, number];
-
-    const bitmap = await capturePreviewFrame(inputImageNodeId, { customSize });
-
-    if (bitmap) {
-      const base64Image = bitmapToBase64Image({
-        bitmap,
-        format: 'image/jpeg',
-        quality: 0.98
-      });
-
-      contents.push({
-        inlineData: {
-          mimeType: 'image/jpeg',
-          data: base64Image
-        }
-      });
-    }
+    contents.push({ inlineData: image });
   }
 
   // Add text prompt
@@ -120,14 +101,33 @@ export async function generateImageWithOpenRouter(
     apiKey,
     model,
     abortSignal,
+    inputImageNodeId,
     options
   }: {
     apiKey: string;
     model: string;
     abortSignal?: AbortSignal;
+    inputImageNodeId?: string;
     options?: ImageGenerationOptions;
   }
 ): Promise<ImageBitmap> {
+  abortSignal?.throwIfAborted();
+
+  const inputImage = inputImageNodeId
+    ? await captureImageGenerationInput(inputImageNodeId, abortSignal)
+    : undefined;
+
+  const inputReferences = inputImage
+    ? [
+        {
+          type: 'image_url',
+          image_url: {
+            url: `data:${inputImage.mimeType};base64,${inputImage.data}`
+          }
+        }
+      ]
+    : undefined;
+
   const response = await fetch('https://openrouter.ai/api/v1/images', {
     method: 'POST',
     headers: {
@@ -139,7 +139,8 @@ export async function generateImageWithOpenRouter(
     body: JSON.stringify({
       model,
       prompt,
-      ...getOpenRouterImageOptions(options)
+      ...getOpenRouterImageOptions(options),
+      ...(inputReferences && { input_references: inputReferences })
     }),
     signal: abortSignal
   });
@@ -163,6 +164,31 @@ export async function generateImageWithOpenRouter(
   }
 
   throw new Error(`OpenRouter returned no image for model "${model}".`);
+}
+
+async function captureImageGenerationInput(nodeId: string, abortSignal?: AbortSignal) {
+  abortSignal?.throwIfAborted();
+
+  const glSystem = GLSystem.getInstance();
+  const customSize: [number, number] = [...glSystem.outputSize];
+  const bitmap = await capturePreviewFrame(nodeId, { customSize });
+
+  if (!bitmap) {
+    abortSignal?.throwIfAborted();
+
+    throw new Error('Could not capture the connected image input.');
+  }
+
+  try {
+    abortSignal?.throwIfAborted();
+
+    return {
+      mimeType: 'image/jpeg',
+      data: bitmapToBase64Image({ bitmap, format: 'image/jpeg', quality: 0.98 })
+    };
+  } finally {
+    bitmap.close();
+  }
 }
 
 export function createLLMFunction() {
