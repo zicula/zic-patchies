@@ -77,6 +77,10 @@ Presets are displayed in 3 places:
 - It should look similar to `FileTreeView.svelte`
 - The sidebar will no longer be for just files, its also for presets.
 - The user should be able to _drag out presets_ onto the canvas. This inserts the object.
+- Search results support the same Rename and Delete context menu actions as editable tree
+  entries. Rename edits the result inline; deletion uses the existing confirmation and updates
+  the results without clearing the search query. Read-only presets have no editing menu.
+- Delete and Backspace also delete selected editable presets in search results.
 
 ## Populating text object default parameters
 
@@ -285,3 +289,16 @@ src/
     └── preset-library.store.ts   # Main store
 └── builtin/                      # Built-in preset library current in `lib/presets`
 ```
+
+## Saved node dimensions
+
+Saving a preset records the node's explicit top-level `width` and `height`,
+which Svelte Flow updates when a node is resized. Do not capture `measured`
+dimensions: those also include automatic sizing of nodes that were never resized.
+
+Presets carry optional top-level `width` and `height` alongside `type` and `data`.
+Library persistence and JSON import/export retain these fields. Inserting a preset
+from the sidebar (including drag/drop), Quick Insert, or chat applies saved dimensions
+to the new node before recording its insertion in history. Dimensions that are not
+specified use the node's normal sizing behavior. Resaving a node captures its current
+size without changing the earlier preset.
